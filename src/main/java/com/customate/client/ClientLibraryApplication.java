@@ -17,8 +17,8 @@ public class ClientLibraryApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientLibraryApplication.class);
 
-	private static CustomateClient customateClient = new CustomateClient("https://dev-api.gocustomate.com",
-			"v1", "893cd25e-b5e9-4cec-aee0-e76edd698d9b", "295396fe350d478fa62e82db0c4ec1048c5c965c8c5f291057");
+	private static CustomateClient customateClient = new CustomateClient("<API URL>",
+			"v1", "<YOUR API KEY>", "<YOUR API SECRET>");
 
 	public static void main(String[] args) {
 		SpringApplication.run(ClientLibraryApplication.class, args);
