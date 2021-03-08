@@ -215,15 +215,13 @@ public class TestSDKApplication {
 
 			// Get the list of non-processing dates, specifying the unverified direct debit funding source ID and bank account payee ID
 			// It takes 7 days to verify the funding source and 7 days to process a DD payment, so there are 14 dates
-			NonProcessingDates nonProcessingDatesId = getNonProcessingDates(today, twoWeeksTime,
-					fundingSource.getId(), bankAccountPayeeProfile2.getId());
+			NonProcessingDates nonProcessingDatesId = getNonProcessingDates(today, twoWeeksTime, fundingSource.getId(), bankAccountPayeeProfile2.getId());
 			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source and bank account payee\n" +
 					nonProcessingDatesId.asJson() + "\n");
 
 			// Get the list of non-processing dates, specifying the direct debit funding source type and bank account payee type
 			// It takes 7 days to process a DD payment, so there are 7 dates
-			NonProcessingDates nonProcessingDatesType = getNonProcessingDates(today, nextWeek,
-					FundingSourceType.direct_debit, PayeeType.bank_account);
+			NonProcessingDates nonProcessingDatesType = getNonProcessingDates(today, nextWeek, FundingSourceType.direct_debit, PayeeType.bank_account);
 			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source type and bank account payee type\n" +
 					nonProcessingDatesType.asJson() + "\n");
 
