@@ -151,14 +151,14 @@ public class TestSDKApplication {
 			Payment walletToBankAccountPayment = createWalletToBankAccountPayment(profile.getId(), bankAccountPayeeProfile2.getId());
 			LOGGER.info("Wallet to bank account payment from profile, ID: " + profile.getId() + "\n" + walletToBankAccountPayment.asJson() + "\n");
 
-            // Get the payee ID of profile 2 so that profile 1 can do a wallet to wallet payment
-            UUID gbpPayeeIdProfile2 = null;
-            PayeePage payeesProfile2 = getPayees(profile2.getId());
-            for (Payee payee : payeesProfile2.getItems()) {
-                if (payee.getCurrency().equals(Currency.GBP) && payee.getPayeeType().equals(PayeeType.wallet)) {
+			// Get the payee ID of profile 2 so that profile 1 can do a wallet to wallet payment
+			UUID gbpPayeeIdProfile2 = null;
+			PayeePage payeesProfile2 = getPayees(profile2.getId());
+			for (Payee payee : payeesProfile2.getItems()) {
+				if (payee.getCurrency().equals(Currency.GBP) && payee.getPayeeType().equals(PayeeType.wallet)) {
 					gbpPayeeIdProfile2 = payee.getId();
-                }
-            }
+				}
+			}
 
 			// Get the funding source ID of profile 1 so that profile 1 can do a wallet to wallet payment using the generic create() method
 			UUID gbpFundingSourceId = null;
@@ -171,13 +171,13 @@ public class TestSDKApplication {
 			}
 
 			// Create a wallet to wallet payment
-            Payment walletToWalletPayment = createWalletToWalletPayment(profile.getId(), gbpPayeeIdProfile2);
-            LOGGER.info("Wallet to wallet payment from profile, ID: " + profile.getId() + "\n" + walletToWalletPayment.asJson() + "\n");
+			Payment walletToWalletPayment = createWalletToWalletPayment(profile.getId(), gbpPayeeIdProfile2);
+			LOGGER.info("Wallet to wallet payment from profile, ID: " + profile.getId() + "\n" + walletToWalletPayment.asJson() + "\n");
 
 			// Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
 			Payment fundingSourceToPayeePayment = createFundingSourceToPayeePayment(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
 			LOGGER.info("Wallet to wallet payment using PaymentService.create() from profile, ID: " +
-						profile.getId() + "\n" + fundingSourceToPayeePayment.asJson() + "\n");
+					profile.getId() + "\n" + fundingSourceToPayeePayment.asJson() + "\n");
 
 			// Get all payments for the profile
 			PaymentPage payments = getPayments(profile.getId());
@@ -216,16 +216,16 @@ public class TestSDKApplication {
 			// Get the list of non-processing dates, specifying the unverified direct debit funding source ID and bank account payee ID
 			// It takes 7 days to verify the funding source and 7 days to process a DD payment, so there are 14 dates
 			NonProcessingDates nonProcessingDatesId = getNonProcessingDates(today, twoWeeksTime,
-																			fundingSource.getId(), bankAccountPayeeProfile2.getId());
+					fundingSource.getId(), bankAccountPayeeProfile2.getId());
 			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source and bank account payee\n" +
-							nonProcessingDatesId.asJson() + "\n");
+					nonProcessingDatesId.asJson() + "\n");
 
 			// Get the list of non-processing dates, specifying the direct debit funding source type and bank account payee type
 			// It takes 7 days to process a DD payment, so there are 7 dates
 			NonProcessingDates nonProcessingDatesType = getNonProcessingDates(today, nextWeek,
-																			  FundingSourceType.direct_debit, PayeeType.bank_account);
+					FundingSourceType.direct_debit, PayeeType.bank_account);
 			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source type and bank account payee type\n" +
-							nonProcessingDatesType.asJson() + "\n");
+					nonProcessingDatesType.asJson() + "\n");
 
 			// Get all transactions for the profile
 			TransactionPage transactions = getTransactions(profile.getId());
@@ -239,9 +239,9 @@ public class TestSDKApplication {
 			Transaction transaction = getTransaction(profile.getId(), UUID.fromString("bcdd31ab-b9cb-415f-821c-74f00c9aa377"));
 			LOGGER.info("Transaction\n" + transaction.asJson() + "\n");
 
-            // Create a schedule, paying profile 2
-            Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
-            LOGGER.info("7 day schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule.asJson() + "\n");
+			// Create a schedule, paying profile 2
+			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
+			LOGGER.info("7 day schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule.asJson() + "\n");
 
 			// Update the schedule, extending it by another week
 			Schedule schedule1 = updateSchedule(profile.getId(), schedule);
@@ -721,7 +721,7 @@ public class TestSDKApplication {
 			// Create some metadata (optional)
 			JsonNode metadata = JsonHelper.createEmptyObjectNode();
 			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-			
+
 			PaymentOpenBankingCreate paymentOpenBankingCreate = new PaymentOpenBankingBuilder().setAmount(10000)
 					.setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
 					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96069")
@@ -734,47 +734,47 @@ public class TestSDKApplication {
 		}
 	}
 
-    // Create a wallet to bank account payment from the profile to the payee
-    private static Payment createWalletToBankAccountPayment(UUID profileId, UUID payeeId) {
-        try {
-            // Create some metadata (optional)
-            JsonNode metadata = JsonHelper.createEmptyObjectNode();
-            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+	// Create a wallet to bank account payment from the profile to the payee
+	private static Payment createWalletToBankAccountPayment(UUID profileId, UUID payeeId) {
+		try {
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
 
-            Date date = new Date();
-            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
-
-            PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
-                    .setAmount(1000).setDescription("Payment to bank account").setExecutionDate(now)
-                    .setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
-
-            return PaymentService.createWalletToBankAccount(profileId, paymentWalletToPayeeCreate);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
-
-    // Create a wallet to wallet payment from the profile to the payee
-    private static Payment createWalletToWalletPayment(UUID profileId, UUID payeeId) {
-        try {
-            // Create some metadata (optional)
-            JsonNode metadata = JsonHelper.createEmptyObjectNode();
-            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-            Date date = new Date();
-            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+			Date date = new Date();
+			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
 			PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
-                    .setAmount(1000).setDescription("Payment to wallet").setExecutionDate(now)
+					.setAmount(1000).setDescription("Payment to bank account").setExecutionDate(now)
 					.setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
 
-            return PaymentService.createWalletToWallet(profileId, paymentWalletToPayeeCreate);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
+			return PaymentService.createWalletToBankAccount(profileId, paymentWalletToPayeeCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+	// Create a wallet to wallet payment from the profile to the payee
+	private static Payment createWalletToWalletPayment(UUID profileId, UUID payeeId) {
+		try {
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+			Date date = new Date();
+			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+
+			PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
+					.setAmount(1000).setDescription("Payment to wallet").setExecutionDate(now)
+					.setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
+
+			return PaymentService.createWalletToWallet(profileId, paymentWalletToPayeeCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
 
 	// Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
 	private static Payment createFundingSourceToPayeePayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
@@ -863,7 +863,7 @@ public class TestSDKApplication {
 
 	// Get the list of non-processing dates with a funding source type and payee type
 	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate,
-                                                            FundingSourceType fundingSourceType, PayeeType payeeType) {
+															FundingSourceType fundingSourceType, PayeeType payeeType) {
 		try {
 			return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate, fundingSourceType, payeeType);
 		} catch (Exception e) {

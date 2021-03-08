@@ -149,14 +149,14 @@ public class TestSDKApplication {
 			Payment walletToBankAccountPayment = createWalletToBankAccountPayment(profile.getId(), bankAccountPayeeProfile2.getId());
 			LOGGER.info("Wallet to bank account payment from profile, ID: " + profile.getId() + "\n" + walletToBankAccountPayment.asJson() + "\n");
 
-            // Get the payee ID of profile 2 so that profile 1 can do a wallet to wallet payment
-            UUID gbpPayeeIdProfile2 = null;
-            PayeePage payeesProfile2 = getPayees(profile2.getId());
-            for (Payee payee : payeesProfile2.getItems()) {
-                if (payee.getCurrency().equals(Currency.GBP) && payee.getPayeeType().equals(PayeeType.wallet)) {
+			// Get the payee ID of profile 2 so that profile 1 can do a wallet to wallet payment
+			UUID gbpPayeeIdProfile2 = null;
+			PayeePage payeesProfile2 = getPayees(profile2.getId());
+			for (Payee payee : payeesProfile2.getItems()) {
+				if (payee.getCurrency().equals(Currency.GBP) && payee.getPayeeType().equals(PayeeType.wallet)) {
 					gbpPayeeIdProfile2 = payee.getId();
-                }
-            }
+				}
+			}
 
 			// Get the funding source ID of profile 1 so that profile 1 can do a wallet to wallet payment using the generic create() method
 			UUID gbpFundingSourceId = null;
@@ -169,8 +169,8 @@ public class TestSDKApplication {
 			}
 
 			// Create a wallet to wallet payment
-            Payment walletToWalletPayment = createWalletToWalletPayment(profile.getId(), gbpPayeeIdProfile2);
-            LOGGER.info("Wallet to wallet payment from profile, ID: " + profile.getId() + "\n" + walletToWalletPayment.asJson() + "\n");
+			Payment walletToWalletPayment = createWalletToWalletPayment(profile.getId(), gbpPayeeIdProfile2);
+			LOGGER.info("Wallet to wallet payment from profile, ID: " + profile.getId() + "\n" + walletToWalletPayment.asJson() + "\n");
 
 			// Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
 			Payment fundingSourceToPayeePayment = createFundingSourceToPayeePayment(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
@@ -237,9 +237,9 @@ public class TestSDKApplication {
 			Transaction transaction = getTransaction(profile.getId(), UUID.fromString("bcdd31ab-b9cb-415f-821c-74f00c9aa377"));
 			LOGGER.info("Transaction\n" + transaction.asJson() + "\n");
 
-            // Create a schedule, paying profile 2
-            Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
-            LOGGER.info("7 day schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule.asJson() + "\n");
+			// Create a schedule, paying profile 2
+			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
+			LOGGER.info("7 day schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule.asJson() + "\n");
 
 			// Update the schedule, extending it by another week
 			Schedule schedule1 = updateSchedule(profile.getId(), schedule);
