@@ -1,4 +1,8 @@
 # java-sdk
 Java SDK for clients accessing Customate's public API.
 
-Include the JAR file in your project and see ClientLibraryApplication.java as an example of how to use it.
+Copy TestSDKApplication.java, which calls all the endpoints.
+
+Add client-library.jar to your project and copy the four lines from application.properties
+
+Contact Customate for an API key and secret.
