@@ -33,7 +33,8 @@ public enum TransactionName {
     MoneyInDdFeeAndTax("MoneyInDdFeeAndTax"),
     MoneyOutBtFeeAndTax("MoneyOutBtFeeAndTax"),
     OpenBankingToWallet("OpenBankingToWallet"),
-    MoneyInObFeeAndTax("MoneyInObFeeAndTax");
+    MoneyInObFeeAndTax("MoneyInObFeeAndTax"),
+    External("External");
 
     private String transactionName;
 

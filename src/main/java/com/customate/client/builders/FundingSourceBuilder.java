@@ -68,7 +68,7 @@ public class FundingSourceBuilder {
     /**
      * Builds a funding source (for creation).
      *
-     * @return FundingSource  The funding source.
+     * @return FundingSourceCreate  The funding source.
      */
     public FundingSourceCreate build() {
         return new FundingSourceCreate(title, currency, fundingSourceType, fundingSourceCreateData);

@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Models a bank (in wallet data).
+ * Models a bank (in wallet and payee data).
  *
  * Date: 11-Feb-21
  * Time: 3:14 PM

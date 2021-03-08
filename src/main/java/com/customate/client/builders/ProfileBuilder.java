@@ -5,9 +5,7 @@ import com.customate.client.enums.ProfileType;
 import com.customate.client.enums.Title;
 import com.customate.client.models.Address;
 import com.customate.client.models.Profile;
-import com.customate.client.models.VerificationResponse;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.UUID;
 
 /**
  * Builds a profile.

@@ -1,7 +1,9 @@
 package com.customate.client.builders;
 
 import com.customate.client.enums.FundingSourceOwnership;
-import com.customate.client.models.*;
+import com.customate.client.models.FundingSourceAccount;
+import com.customate.client.models.FundingSourceCreateData;
+import com.customate.client.models.FundingSourcePayer;
 
 /**
  * Builds funding source data.

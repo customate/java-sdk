@@ -1,7 +1,5 @@
 package com.customate.client.enums;
 
-import java.util.List;
-
 /**
  * Enumeration of funding source validation status.
  * 

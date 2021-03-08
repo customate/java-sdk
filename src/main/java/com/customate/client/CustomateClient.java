@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,27 +39,22 @@ public class CustomateClient {
     private static String apiKey;
     private static String apiSecret;
 
-    private static final HttpClient httpClient = HttpClient.newBuilder().build();
-
-    /**
-     * Default constructor.
-     */
-    public CustomateClient() { }
-
-    /**
-     * Constructor.
-     *
-     * @param baseUrl  Public API URL (https://api.gocustomate.com, or prepend api with dev-, stage-, or sandbox-).
-     * @param version  Version of the API (currently v1).
-     * @param apiKey  The API key provided to you.
-     * @param apiSecret  The API secret provided to you.
-     */
-    public CustomateClient(String baseUrl, String version, String apiKey, String apiSecret) {
-        this.baseUrl = baseUrl;
-        this.version = version;
-        this.apiKey = apiKey;
-        this.apiSecret = apiSecret;
+    // Get credentials
+    static {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Properties properties = new Properties();
+        try (InputStream resourceStream = loader.getResourceAsStream("application.properties")) {
+            properties.load(resourceStream);
+            baseUrl = (String) properties.get("customate.baseUrl");
+            version = (String) properties.get("customate.version");
+            apiKey = (String) properties.get("customate.apiKey");
+            apiSecret = (String) properties.get("customate.apiSecret");
+        } catch (IOException e) {
+            System.out.println("Expected application.properties to have entries for customate.baseUrl, customate.version, customate.apiKey and customate.apiSecret");
+        }
     }
+
+    private static final HttpClient httpClient = HttpClient.newBuilder().build();
 
     /**
      * Sends a GET request.

@@ -1,6 +1,8 @@
 package com.customate.client.builders;
 
-import com.customate.client.models.*;
+import com.customate.client.models.DriverLicence;
+import com.customate.client.models.Passport;
+import com.customate.client.models.VerificationRequest;
 
 /**
  * Builds a verification request.
