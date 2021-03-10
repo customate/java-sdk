@@ -45,7 +45,7 @@ public class TestSDKApplication {
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney96@music.com", "+447773100096");
+			Profile profile = createProfile("paulmccartney106@music.com", "+447773100106");
 			LOGGER.info("Profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -57,7 +57,7 @@ public class TestSDKApplication {
 			LOGGER.info("Verified profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney97@music.com", "+447773200097");
+			Profile profile2 = createProfile("paulmccartney107@music.com", "+447773200107");
 			LOGGER.info("Profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -88,9 +88,9 @@ public class TestSDKApplication {
 			WalletPage walletPage = getWalletPage(profile.getId(), 1, 1);
 			LOGGER.info("Page 1 with 1 wallet per page for profile, ID: " + profile.getId() + "\n" + walletPage.asJson() + "\n");
 
-			// Create a (direct debit) funding source for the profile
-			FundingSource fundingSource = createFundingSource(profile.getId());
-			LOGGER.info("Created funding source for profile, ID: " + profile.getId() + "\n" + fundingSource.asJson() + "\n");
+			// Create a direct debit funding source for the profile
+			FundingSource fundingSource = createDirectDebitFundingSource(profile.getId());
+			LOGGER.info("Created direct debit funding source for profile, ID: " + profile.getId() + "\n" + fundingSource.asJson() + "\n");
 
 			// Get the newly-created funding source
 			FundingSource fundingSource1 = getFundingSource(profile.getId(), fundingSource.getId());
@@ -101,6 +101,10 @@ public class TestSDKApplication {
 			FundingSource fundingSource2 = renameFundingSource(profile.getId(), fundingSource1.getId());
 			LOGGER.info("Funding source, renamed to: " + fundingSource2.getTitle() + ", ID: " + fundingSource2.getId() +
 					" for profile, ID: " + profile.getId() + "\n" + fundingSource2.asJson() + "\n");
+
+			// Create another (direct debit) funding source for the profile, using the generic create funding source method
+			FundingSource fundingSourceDD = createFundingSource(profile.getId());
+			LOGGER.info("Created funding source (using the generic create method) for profile, ID: " + profile.getId() + "\n" + fundingSourceDD.asJson() + "\n");
 
 			// Get the funding sources for the profile
 			FundingSourcePage fundingSources = getFundingSources(profile.getId());
@@ -595,6 +599,29 @@ public class TestSDKApplication {
 							.setFundingSourceCreateData(fundingSourceCreateData).build();
 
 			return FundingSourceService.create(profileId, fundingSourceCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+	// Create a direct debit funding source for a profile
+	private static FundingSource createDirectDebitFundingSource(UUID profileId) {
+		try {
+			FundingSourcePayer fundingSourcePayer = new FundingSourcePayerBuilder().setFullName("Jack Smith").build();
+
+			FundingSourceAccount fundingSourceAccount =
+					new FundingSourceAccountBuilder().setSortCode("040004").setAccountNumber("37618166").build();
+
+			FundingSourceCreateData fundingSourceCreateData = new FundingSourceDataBuilder()
+					.setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourcePayer)
+					.setFundingSourceAccount(fundingSourceAccount).build();
+
+			FundingSourceDDCreate fundingSourceDDCreate =
+					new FundingSourceDDBuilder().setTitle("Direct Debit Source 2")
+							.setCurrency(Currency.GBP).setFundingSourceCreateData(fundingSourceCreateData).build();
+
+			return FundingSourceService.createDirectDebit(profileId, fundingSourceDDCreate);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return null;

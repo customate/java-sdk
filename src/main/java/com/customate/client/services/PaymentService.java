@@ -92,7 +92,7 @@ public class PaymentService {
      */
     public static PaymentOpenBanking createOpenBanking(UUID profileId, PaymentOpenBankingCreate paymentOpenBankingCreate)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
-        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/open_banking_to_wallet",
+        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/open_banking_to_wallet_payments",
                                                                 paymentOpenBankingCreate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
@@ -112,7 +112,7 @@ public class PaymentService {
      */
     public static Payment createWalletToBankAccount(UUID profileId, PaymentWalletToPayeeCreate paymentWalletToPayeeCreate)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
-        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/wallet_to_bank_account",
+        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/wallet_to_bank_account_payments",
                 paymentWalletToPayeeCreate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
@@ -132,7 +132,7 @@ public class PaymentService {
      */
     public static Payment createWalletToWallet(UUID profileId, PaymentWalletToPayeeCreate paymentWalletToPayeeCreate)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
-        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/wallet_to_wallet",
+        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/wallet_to_wallet_payments",
                 paymentWalletToPayeeCreate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();

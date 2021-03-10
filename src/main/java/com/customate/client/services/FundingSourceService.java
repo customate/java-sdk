@@ -2,10 +2,7 @@ package com.customate.client.services;
 
 import com.customate.client.CustomateClient;
 import com.customate.client.exceptions.ApiException;
-import com.customate.client.models.FundingSource;
-import com.customate.client.models.FundingSourceCreate;
-import com.customate.client.models.FundingSourcePage;
-import com.customate.client.models.TitleName;
+import com.customate.client.models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -95,6 +92,26 @@ public class FundingSourceService {
             throws URISyntaxException, IOException, InterruptedException, ApiException {
         HttpResponse<String> response =
                 CustomateClient.post("profiles/" + profileId + "/funding_sources", fundingSourceCreate.asJson());
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, FundingSource.class);
+    }
+
+    /**
+     * Creates a direct debit funding source (the JSON format is different when creating and getting funding sources).
+     *
+     * @param profileId  Profile ID.
+     * @param fundingSourceDDCreate  The direct debit funding source to create.
+     * @return Funding Source  The funding source.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static FundingSource createDirectDebit(UUID profileId, FundingSourceDDCreate fundingSourceDDCreate)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response =
+                CustomateClient.post("profiles/" + profileId + "/direct_debit_funding_sources", fundingSourceDDCreate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, FundingSource.class);
