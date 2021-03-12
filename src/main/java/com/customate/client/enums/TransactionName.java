@@ -25,6 +25,8 @@ public enum TransactionName {
     CreditCardToVirtualWallet("CreditCardToVirtualWallet"),
     DirectDebitToWallet("DirectDebitToWallet"),
     DirectDebitToVirtualWallet("DirectDebitToVirtualWallet"),
+    DirectDebitToInternal("DirectDebitToInternal"),
+    IncomingDirectDebit("IncomingDirectDebit"),
     IncomingTax("IncomingTax"),
     IncomingFee("IncomingFee"),
     InternalFeeAndTax("InternalFeeAndTax"),

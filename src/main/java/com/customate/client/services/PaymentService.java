@@ -140,6 +140,26 @@ public class PaymentService {
     }
 
     /**
+     * Creates a single direct debit to wallet payment (the JSON format is different when creating and getting payments).
+     *
+     * @param profileId  Profile ID.
+     * @param paymentFundingSourceToPayeeCreate  The payment to create.
+     * @return Payment  The payment.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static Payment createDirectDebitToWallet(UUID profileId, PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/direct_debit_to_wallet_payments",
+                paymentFundingSourceToPayeeCreate.asJson());
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, Payment.class);
+    }
+
+    /**
      * Creates a (funding source to payee) payment (the JSON format is different when creating and getting payments).
      *
      * @param profileId  Profile ID.

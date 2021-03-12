@@ -45,7 +45,7 @@ public class TestSDKApplication {
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney106@music.com", "+447773100106");
+			Profile profile = createProfile("paulmccartney126@music.com", "+447773100126");
 			LOGGER.info("Profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -57,7 +57,7 @@ public class TestSDKApplication {
 			LOGGER.info("Verified profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney107@music.com", "+447773200107");
+			Profile profile2 = createProfile("paulmccartney127@music.com", "+447773200127");
 			LOGGER.info("Profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -178,6 +178,11 @@ public class TestSDKApplication {
 			Payment walletToWalletPayment = createWalletToWalletPayment(profile.getId(), gbpPayeeIdProfile2);
 			LOGGER.info("Wallet to wallet payment from profile, ID: " + profile.getId() + "\n" + walletToWalletPayment.asJson() + "\n");
 
+			// Create a single direct debit to wallet payment, paying profile 2
+			// The funding source must be of type direct debit and the payee must be of type wallet
+			Payment directDebitToWalletPayment = createDirectDebitToWalletPayment(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
+			LOGGER.info("Single direct debit to wallet payment paying profile 2, ID: " + profile2.getId() + "\n" + directDebitToWalletPayment.asJson() + "\n");
+
 			// Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
 			Payment fundingSourceToPayeePayment = createFundingSourceToPayeePayment(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
 			LOGGER.info("Wallet to wallet payment using PaymentService.create() from profile, ID: " +
@@ -208,6 +213,11 @@ public class TestSDKApplication {
 			// Returns the ID of the saxo_transferinstruction in the database: customate_sandbox.
 			SaxoTransferInstruction saxoTransferInstruction = createServicePayment(profile.getId(), gbpPayeeIdProfile1);
 			LOGGER.info("Service payment\n" + saxoTransferInstruction.asJson() + "\n");
+
+			// Create a single direct debit to wallet payment, paying profile 1
+			// The funding source must be of type direct debit and the payee must be of type wallet
+			Payment directDebitToWalletPayment2 = createDirectDebitToWalletPayment(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile1);
+			LOGGER.info("Single direct debit to wallet payment, paying profile 1, ID: " + profile.getId() + "\n" + directDebitToWalletPayment2.asJson() + "\n");
 
 			// Get the list of non-processing dates (dates in the future that banks cannot process payments as they are closed)
 			// There will be 2 dates (Saturday, Sunday), or more if there's a public holiday during the week
@@ -795,6 +805,28 @@ public class TestSDKApplication {
 					.setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
 
 			return PaymentService.createWalletToWallet(profileId, paymentWalletToPayeeCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+	// Create a single direct debit to wallet payment from the profile to the payee
+	// The funding source must be of type direct debit and the payee must be of type wallet
+	private static Payment createDirectDebitToWalletPayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
+		try {
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+			Date date = new Date();
+			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+
+			PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate = new PaymentFundingSourceToPayeeBuilder()
+					.setAmount(1001).setDescription("Single Direct Debit to wallet").setExecutionDate(now)
+					.setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
+
+			return PaymentService.createDirectDebitToWallet(profileId, paymentFundingSourceToPayeeCreate);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return null;
