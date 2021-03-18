@@ -1,11 +1,10 @@
 package com.customate.client.services;
 
 import com.customate.client.CustomateClient;
+import com.customate.client.enums.FundingSourceType;
+import com.customate.client.enums.PayeeType;
 import com.customate.client.exceptions.ApiException;
-import com.customate.client.models.Schedule;
-import com.customate.client.models.ScheduleCreate;
-import com.customate.client.models.SchedulePage;
-import com.customate.client.models.ScheduleUpdate;
+import com.customate.client.models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -113,6 +112,38 @@ public class ScheduleService {
     public static Schedule update(UUID profileId, UUID scheduleId, ScheduleUpdate scheduleUpdate)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
         HttpResponse<String> response = CustomateClient.put("profiles/" + profileId + "/schedules/" + scheduleId, scheduleUpdate.asJson());
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, Schedule.class);
+    }
+
+    /**
+     * Creates a direct debit to wallet schedule.
+     *
+     * @param profileId  Profile ID.
+     * @param scheduleDDToWalletCreate  The direct debit to wallet schedule to create.
+     * @return Schedule  The schedule.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static Schedule createDirectDebitToWallet(UUID profileId, ScheduleDDToWalletCreate scheduleDDToWalletCreate)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+
+        FundingSource fundingSource = FundingSourceService.get(profileId, scheduleDDToWalletCreate.getFundingSourceId());
+        FundingSourceType fundingSourceType = fundingSource.getFundingSourceType();
+        Payee payee = PayeeService.get(profileId, scheduleDDToWalletCreate.getPayeeId());
+        PayeeType payeeType = payee.getPayeeType();
+
+        if (fundingSourceType != FundingSourceType.direct_debit) {
+            throw new ApiException("Cannot create direct debit to wallet schedule as the funding source (type: " + fundingSourceType + ") is not of type direct_debit");
+        }
+        if (payeeType != PayeeType.wallet) {
+            throw new ApiException("Cannot create direct debit to wallet schedule as the payee (type: " + payeeType + ") is not of type wallet");
+        }
+        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId +
+                                                "/direct_debit_to_wallet_schedules", scheduleDDToWalletCreate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, Schedule.class);

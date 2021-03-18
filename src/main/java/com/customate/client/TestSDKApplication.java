@@ -34,9 +34,9 @@ public class TestSDKApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
 
+	// Tests all the endpoints
 	public static void main(String[] args) {
 		SpringApplication.run(TestSDKApplication.class, args);
-
 		try {
 			LOGGER.info("\n");
 
@@ -45,32 +45,32 @@ public class TestSDKApplication {
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney126@music.com", "+447773100126");
-			LOGGER.info("Profile\n" + profile.asJson() + "\n");
+			Profile profile = createProfile("paulmccartney185@music.com", "+447773100185");
+			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
 			VerificationResponse verificationResponse = forceVerifyProfile(profile);
-			LOGGER.info("Force-verification of profile\n" + verificationResponse.asJson() + "\n");
+			LOGGER.info("Force-verify of profile\n" + verificationResponse.asJson() + "\n");
 
 			// Get the newly-created profile
 			Profile verifiedProfile = getProfile(profile.getId());
-			LOGGER.info("Verified profile\n" + verifiedProfile.asJson() + "\n");
+			LOGGER.info("Verify profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney127@music.com", "+447773200127");
-			LOGGER.info("Profile 2\n" + profile2.asJson() + "\n");
+			Profile profile2 = createProfile("paulmccartney186@music.com", "+447773200186");
+			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
 			VerificationResponse verificationResponse2 = verifyProfile(profile2);
-			LOGGER.info("Verification of profile 2\n" + verificationResponse2.asJson() + "\n");
+			LOGGER.info("Verify profile 2\n" + verificationResponse2.asJson() + "\n");
 
 			// Force-verify the second profile
 			VerificationResponse verificationResponse3 = forceVerifyProfile(profile2);
-			LOGGER.info("Force-verification of profile 2\n" + verificationResponse3.asJson() + "\n");
+			LOGGER.info("Force-verify of profile 2\n" + verificationResponse3.asJson() + "\n");
 
 			// Update the profile's address from Westminster Cathedral to Westminster Abbey
 			Profile updatedProfile = updateProfile(profile);
-			LOGGER.info("Updated profile\n" + updatedProfile.asJson() + "\n");
+			LOGGER.info("Update profile\n" + updatedProfile.asJson() + "\n");
 
 			// Get all profiles
 			ProfilePage profiles = getProfiles();
@@ -90,11 +90,11 @@ public class TestSDKApplication {
 
 			// Create a direct debit funding source for the profile
 			FundingSource fundingSource = createDirectDebitFundingSource(profile.getId());
-			LOGGER.info("Created direct debit funding source for profile, ID: " + profile.getId() + "\n" + fundingSource.asJson() + "\n");
+			LOGGER.info("Create direct debit funding source for profile, ID: " + profile.getId() + "\n" + fundingSource.asJson() + "\n");
 
 			// Get the newly-created funding source
 			FundingSource fundingSource1 = getFundingSource(profile.getId(), fundingSource.getId());
-			LOGGER.info("Funding source, ID: " + fundingSource1.getId() + " for profile, ID: " +
+			LOGGER.info("Get funding source, ID: " + fundingSource1.getId() + " for profile, ID: " +
 					profile.getId() + "\n" + fundingSource1.asJson() + "\n");
 
 			// Rename the funding source
@@ -104,7 +104,7 @@ public class TestSDKApplication {
 
 			// Create another (direct debit) funding source for the profile, using the generic create funding source method
 			FundingSource fundingSourceDD = createFundingSource(profile.getId());
-			LOGGER.info("Created funding source (using the generic create method) for profile, ID: " + profile.getId() + "\n" + fundingSourceDD.asJson() + "\n");
+			LOGGER.info("Create funding source (using the generic create method) for profile, ID: " + profile.getId() + "\n" + fundingSourceDD.asJson() + "\n");
 
 			// Get the funding sources for the profile
 			FundingSourcePage fundingSources = getFundingSources(profile.getId());
@@ -117,7 +117,7 @@ public class TestSDKApplication {
 
 			// Create a GBP bank account payee for profile 2
 			Payee bankAccountPayeeProfile2 = createBankAccountPayee(profile.getId());
-			LOGGER.info("Created bank account payee for profile 2, ID: " + profile2.getId() + "\n" +
+			LOGGER.info("Create bank account payee for profile 2, ID: " + profile2.getId() + "\n" +
 					bankAccountPayeeProfile2.asJson() + "\n");
 
 			// Get all payees for the profile
@@ -125,12 +125,12 @@ public class TestSDKApplication {
 			LOGGER.info("Payees for profile, ID: " + profile.getId() + "\n" + payees.asJson() + "\n");
 
 			// Get a page of payees for the profile
-			PayeePage payeePage = getPayeePage(profile.getId(), 1, 1);
-			LOGGER.info("Page 1 with 1 payee per page for profile, ID: " + profile.getId() + "\n" + payeePage.asJson() + "\n");
+			PayeePage payeePage = getPayeePage(profile.getId(), 1, 2);
+			LOGGER.info("Page 1 with 2 payees per page for profile, ID: " + profile.getId() + "\n" + payeePage.asJson() + "\n");
 
 			// Get the newly-created payee
 			Payee payee1 = getPayee(profile.getId(), bankAccountPayeeProfile2.getId());
-			LOGGER.info("Payee:\n" + payee1.asJson() + "\n");
+			LOGGER.info("Get payee:\n" + payee1.asJson() + "\n");
 
 			// Rename the payee (the payee ID is NOT returned)
 			Payee payee2 = renamePayee(profile.getId(), payee1.getId());
@@ -183,18 +183,13 @@ public class TestSDKApplication {
 			Payment directDebitToWalletPayment = createDirectDebitToWalletPayment(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
 			LOGGER.info("Single direct debit to wallet payment paying profile 2, ID: " + profile2.getId() + "\n" + directDebitToWalletPayment.asJson() + "\n");
 
-			// Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
-			Payment fundingSourceToPayeePayment = createFundingSourceToPayeePayment(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
-			LOGGER.info("Wallet to wallet payment using PaymentService.create() from profile, ID: " +
-					profile.getId() + "\n" + fundingSourceToPayeePayment.asJson() + "\n");
-
 			// Get all payments for the profile
 			PaymentPage payments = getPayments(profile.getId());
 			LOGGER.info("Payments for profile, ID: " + profile.getId() + "\n" + payments.asJson() + "\n");
 
 			// Get a page of payments for the profile
-			PaymentPage paymentPage = getPaymentPage(profile.getId(), 1, 1);
-			LOGGER.info("Page 1 with 1 payment for profile, ID: " + profile.getId() + "\n" + paymentPage.asJson() + "\n");
+			PaymentPage paymentPage = getPaymentPage(profile.getId(), 1, 3);
+			LOGGER.info("Page 1 with 3 payments for profile, ID: " + profile.getId() + "\n" + paymentPage.asJson() + "\n");
 
 			// Get the wallet to bank account payment
 			Payment payment = getPayment(profile.getId(), walletToBankAccountPayment.getId());
@@ -214,10 +209,9 @@ public class TestSDKApplication {
 			SaxoTransferInstruction saxoTransferInstruction = createServicePayment(profile.getId(), gbpPayeeIdProfile1);
 			LOGGER.info("Service payment\n" + saxoTransferInstruction.asJson() + "\n");
 
-			// Create a single direct debit to wallet payment, paying profile 1
-			// The funding source must be of type direct debit and the payee must be of type wallet
-			Payment directDebitToWalletPayment2 = createDirectDebitToWalletPayment(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile1);
-			LOGGER.info("Single direct debit to wallet payment, paying profile 1, ID: " + profile.getId() + "\n" + directDebitToWalletPayment2.asJson() + "\n");
+			// Create a payment using the generic payments endpoint
+			Payment ddToWalletPayment = createFundingSourceToPayeePayment(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
+			LOGGER.info("DD to wallet payment paying profile 2, ID: " + profile2.getId() + "\n" + ddToWalletPayment.asJson() + "\n");
 
 			// Get the list of non-processing dates (dates in the future that banks cannot process payments as they are closed)
 			// There will be 2 dates (Saturday, Sunday), or more if there's a public holiday during the week
@@ -244,8 +238,8 @@ public class TestSDKApplication {
 			LOGGER.info("Transactions for profile, ID: " + profile.getId() + "\n" + transactions.asJson() + "\n");
 
 			// Get a page of transactions
-			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 1);
-			LOGGER.info("Page 1 with 1 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
+			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 3);
+			LOGGER.info("Page 1 with 3 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
 
 			// Get transaction bcdd31ab-b9cb-415f-821c-74f00c9aa377 (works in the development database only)
 			Transaction transaction = getTransaction(profile.getId(), UUID.fromString("bcdd31ab-b9cb-415f-821c-74f00c9aa377"));
@@ -259,17 +253,21 @@ public class TestSDKApplication {
 			Schedule schedule1 = updateSchedule(profile.getId(), schedule);
 			LOGGER.info("14 day schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule1.asJson() + "\n");
 
+			// Create a direct debit to wallet schedule, paying profile 2
+			Schedule scheduleDD = createDirectDebitToWalletSchedule(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
+			LOGGER.info("7 day DD schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + scheduleDD.asJson() + "\n");
+
 			// Get the schedules for the profile
 			SchedulePage schedules = getSchedules(profile.getId());
 			LOGGER.info("Schedules for profile, ID: " + profile.getId() + "\n" + schedules.asJson() + "\n");
 
 			// Get a page of schedules
-			SchedulePage schedulePage = getSchedulePage(profile.getId(), 1, 1);
-			LOGGER.info("Page 1 with 1 schedule per page for profile, ID: " + profile.getId() + "\n" + schedulePage.asJson() + "\n");
+			SchedulePage schedulePage = getSchedulePage(profile.getId(), 1, 3);
+			LOGGER.info("Page 1 with 3 schedule per page for profile, ID: " + profile.getId() + "\n" + schedulePage.asJson() + "\n");
 
 			// Get a schedule
 			Schedule schedule2 = getSchedule(profile.getId(), schedule.getId());
-			LOGGER.info("Schedule, ID: " + schedule.getId() + " for profile, ID: " + profile.getId() + "\n" + schedule2.asJson() + "\n");
+			LOGGER.info("Get schedule, ID: " + schedule.getId() + " for profile, ID: " + profile.getId() + "\n" + schedule2.asJson() + "\n");
 
 			// Create another schedule, paying profile 2
 			Schedule schedule3 = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
@@ -277,28 +275,32 @@ public class TestSDKApplication {
 
 			// Pay overdue payments - will fail as there won't be any overdue payments (the schedule has just been created)
 			int statusCode = payOverduePayments(profile.getId(), schedule);
-			LOGGER.info("(Should fail) Overdue payments paid for schedule, ID: " + schedule.getId() + "\n");
+			LOGGER.info("(Should fail) Overdue payments paid for schedule, ID: " + schedule.getId() + ", status code: " + statusCode + "\n");
+
+			// Check the balance of GBP wallet for profile 1
+			FundingSource fs = getFundingSource(profile.getId(), gbpFundingSourceId);
+			LOGGER.info("(Balance should be 7600) GBP funding source for profile, ID: " + fs.asJson() + "\n");
 
 			// Cancel the first schedule
 			statusCode = cancelSchedule(profile.getId(), schedule.getId());
-			LOGGER.info("Cancelled schedule, ID: " + schedule.getId() + "\n");
+			LOGGER.info("Cancel schedule, ID: " + schedule.getId() + ", status code: " + statusCode + "\n");
 
 			// Cancel the second schedule
 			statusCode = cancelSchedule(profile.getId(), schedule3.getId());
-			LOGGER.info("Cancelled schedule, ID: " + schedule3.getId() + "\n");
+			LOGGER.info("Cancel schedule, ID: " + schedule3.getId() + ", status code: " + statusCode + "\n");
 
 			// Create a webhook
 			Webhook webhook = createWebhook("https://www.yoursite.com/listener");
-			LOGGER.info("Created webhook\n" + webhook.asJson() + "\n");
+			LOGGER.info("Create webhook\n" + webhook.asJson() + "\n");
 
 			// Rename the webhook
 			webhook.setCallbackUrl("https://www.renamedsite.com/listener");
 			Webhook webhook1 = updateWebhook(webhook);
-			LOGGER.info("Updated webhook\n" + webhook1.asJson() + "\n");
+			LOGGER.info("Update webhook\n" + webhook1.asJson() + "\n");
 
 			// Get the webhook
 			Webhook webhook2 = getWebhook(webhook1.getId());
-			LOGGER.info("Webhook, ID: " + webhook2.getId() + "\n" + webhook2.asJson() + "\n");
+			LOGGER.info("Get webhook, ID: " + webhook2.getId() + "\n" + webhook2.asJson() + "\n");
 
 			// Get all webhooks
 			WebhookPage webhooks = getWebhooks();
@@ -306,15 +308,16 @@ public class TestSDKApplication {
 
 			// Get a page of webhooks
 			WebhookPage webhookPage = getWebhookPage(1, 1);
-			LOGGER.info("Page 1 of webhooks\n" + webhookPage.asJson() + "\n");
+			LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
 
 			// Delete the webhook
 			statusCode = deleteWebhook(webhook.getId());
-			LOGGER.info("Deleted webhook, ID: " + webhook.getId() + "\n");
+			LOGGER.info("Delete webhook, ID: " + webhook.getId() + ", status code: " + statusCode + "\n");
 
 			// Delete the wallet to wallet payment (should fail as it's processing or complete)
 			statusCode = deletePayment(profile.getId(), walletToWalletPayment.getId());
-			LOGGER.info("(Should fail) Delete the wallet to wallet payment, ID: " + walletToWalletPayment.getId() + "\n");
+			LOGGER.info("(Should fail) Delete the wallet to wallet payment, ID: " + walletToWalletPayment.getId() +
+					", status code: " + statusCode + "\n");
 
 			// Get all payments for the profile (after trying to delete the wallet to wallet payment)
 			PaymentPage payments2 = getPayments(profile.getId());
@@ -322,25 +325,30 @@ public class TestSDKApplication {
 
 			// Delete the funding source
 			statusCode = deleteFundingSource(profile.getId(), fundingSource.getId());
-			LOGGER.info("Deleted funding source, ID: " + fundingSource.getId() + " from profile, ID: " +
+			LOGGER.info("(Should fail) Delete funding source, ID: " + fundingSource.getId() + " from profile, ID: " +
 					profile.getId() + ", status code: " + statusCode + "\n");
 
 			// Delete the payee
 			statusCode = deletePayee(profile.getId(), bankAccountPayeeProfile2.getId());
-			LOGGER.info("Deleted payee, ID: " + bankAccountPayeeProfile2.getId() + " from profile, ID: " +
+			LOGGER.info("Delete payee, ID: " + bankAccountPayeeProfile2.getId() + " from profile, ID: " +
 					profile.getId() + ", status code: " + statusCode + "\n");
 
 			// Delete the profiles
 			statusCode = deleteProfile(profile.getId());
-			LOGGER.info("Deleted profile, ID: " + profile.getId() + ", status code: " + statusCode + "\n");
+			LOGGER.info("Delete profile, ID: " + profile.getId() + ", status code: " + statusCode + "\n");
 
 			statusCode = deleteProfile(profile2.getId());
-			LOGGER.info("Deleted profile, ID: " + profile2.getId() + ", status code: " + statusCode + "\n");
+			LOGGER.info("Delete profile, ID: " + profile2.getId() + ", status code: " + statusCode + "\n");
 
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception: " + e.getMessage());
 		}
 	}
+
+
+	/**
+	 * These methods call the API services. Use these examples in your code.
+	 */
 
 	// Get the API status
 	private static Status getStatus() {
@@ -351,6 +359,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Create a profile
 	private static Profile createProfile(String email, String phoneNumber) {
@@ -377,6 +386,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Force-verify a profile (doesn't check the country of birth, mother's maiden name, passport or driving licence)
 	private static VerificationResponse forceVerifyProfile(Profile profile) {
 		try {
@@ -386,6 +396,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Verify a profile (check the country of birth, mother's maiden name, passport or driving licence - will fail as this is dummy data)
 	private static VerificationResponse verifyProfile(Profile profile) {
@@ -403,6 +414,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a profile
 	private static Profile getProfile(UUID id) {
 		try {
@@ -412,6 +424,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Update a profile
 	private static Profile updateProfile(Profile profile) {
@@ -428,6 +441,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get all profiles
 	private static ProfilePage getProfiles() {
 		try {
@@ -438,6 +452,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Get a page of profiles
 	private static ProfilePage getProfilePage(int pageNum, int pageSize) {
@@ -450,6 +465,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Delete a profile (should return status code 204)
 	private static int deleteProfile(UUID id) {
 		try {
@@ -459,6 +475,7 @@ public class TestSDKApplication {
 			return 500;
 		}
 	}
+
 
 	// Get all wallets for a profile
 	private static WalletPage getWallets(UUID profileId) {
@@ -470,6 +487,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a page of wallets for a profile
 	private static WalletPage getWalletPage(UUID profileId, int pageNum, int pageSize) {
 		try {
@@ -479,6 +497,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Get all schedules for a profile
 	private static SchedulePage getSchedules(UUID profileId) {
@@ -490,6 +509,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a page of schedules for a profile
 	private static SchedulePage getSchedulePage(UUID profileId, int pageNum, int pageSize) {
 		try {
@@ -500,6 +520,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a schedule for a profile
 	private static Schedule getSchedule(UUID profileId, UUID scheduleId) {
 		try {
@@ -509,6 +530,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Create a schedule for a profile
 	private static Schedule createSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
@@ -536,6 +558,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Updates a schedule
 	private static Schedule updateSchedule(UUID profileId, Schedule schedule) {
 		try {
@@ -551,6 +574,35 @@ public class TestSDKApplication {
 		}
 	}
 
+
+	// Create a direct debit to wallet schedule for a profile
+	// The funding source must be of type direct debit and the payee must be of type wallet
+	private static Schedule createDirectDebitToWalletSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
+		try {
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+			// Append the datetime to the schedule to make it unique
+			Date date = new Date();
+			String today = new SimpleDateFormat("yyyy-MM-dd").format(date);
+			String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
+			String title = "Test Daily Direct Debit to Wallet Schedule " + now;
+
+			ScheduleDDToWalletCreate scheduleDDToWalletCreate = new ScheduleDDToWalletBuilder().setTitle(title)
+					.setSchedulePurpose(SchedulePurpose.pay).setSchedulePeriod(SchedulePeriod.daily).setNumberOfPayments(7)
+					.setRegularPaymentStartDate(today).setRegularPaymentAmount(500).setDepositPaymentDate(today)
+					.setDepositPaymentAmount(100).setDescription("7 day DD to wallet schedule paying £5 a day with a deposit of £1")
+					.setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
+
+			return ScheduleService.createDirectDebitToWallet(profileId, scheduleDDToWalletCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
 	// Pay overdue payments for a schedule
 	private static int payOverduePayments(UUID profileId, Schedule schedule) {
 		try {
@@ -560,6 +612,7 @@ public class TestSDKApplication {
 			return 500;
 		}
 	}
+
 
 	// Cancel a schedule (should return status code 204)
 	private static int cancelSchedule(UUID profileId, UUID scheduleId) {
@@ -571,6 +624,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get the funding sources for a profile
 	private static FundingSourcePage getFundingSources(UUID profileId) {
 		try {
@@ -581,6 +635,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a page of funding sources for a profile
 	private static FundingSourcePage getFundingSourcePage(UUID profileId, int pageNum, int pageSize) {
 		try {
@@ -590,6 +645,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Create a funding source for a profile
 	private static FundingSource createFundingSource(UUID profileId) {
@@ -615,6 +671,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Create a direct debit funding source for a profile
 	private static FundingSource createDirectDebitFundingSource(UUID profileId) {
 		try {
@@ -638,6 +695,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a funding source
 	private static FundingSource getFundingSource(UUID profileId, UUID fundingSourceId) {
 		try {
@@ -647,6 +705,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Rename a funding source
 	private static FundingSource renameFundingSource(UUID profileId, UUID fundingSourceId) {
@@ -658,6 +717,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Delete a funding source (should return status code 204)
 	private static int deleteFundingSource(UUID profileId, UUID fundingSourceId) {
 		try {
@@ -667,6 +727,7 @@ public class TestSDKApplication {
 			return 500;
 		}
 	}
+
 
 	// Get all payees for a profile
 	private static PayeePage getPayees(UUID profileId) {
@@ -678,6 +739,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a page of payees for a profile
 	private static PayeePage getPayeePage(UUID profileId, int pageNum, int pageSize) {
 		try {
@@ -688,6 +750,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a payee for a profile
 	private static Payee getPayee(UUID profileId, UUID payeeId) {
 		try {
@@ -697,6 +760,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Create a (GBP bank account) payee for a profile
 	private static Payee createBankAccountPayee(UUID profileId) {
@@ -729,6 +793,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Rename a payee (the payee ID is NOT returned)
 	private static Payee renamePayee(UUID profileId, UUID payeeId) {
 		try {
@@ -739,6 +804,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Delete a payee (should return status code 204)
 	private static int deletePayee(UUID profileId, UUID payeeId) {
 		try {
@@ -748,6 +814,7 @@ public class TestSDKApplication {
 			return 500;
 		}
 	}
+
 
 	// Create an open banking payment to a profile
 	// TO COMPLETE THE PAYMENT, PASTE THE AUTH_URI THAT'S RETURNED INTO A BROWSER
@@ -768,6 +835,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Create a wallet to bank account payment from the profile to the payee
 	private static Payment createWalletToBankAccountPayment(UUID profileId, UUID payeeId) {
@@ -790,6 +858,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Create a wallet to wallet payment from the profile to the payee
 	private static Payment createWalletToWalletPayment(UUID profileId, UUID payeeId) {
 		try {
@@ -811,6 +880,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Create a single direct debit to wallet payment from the profile to the payee
 	// The funding source must be of type direct debit and the payee must be of type wallet
 	private static Payment createDirectDebitToWalletPayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
@@ -823,7 +893,7 @@ public class TestSDKApplication {
 			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
 			PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate = new PaymentFundingSourceToPayeeBuilder()
-					.setAmount(1001).setDescription("Single Direct Debit to wallet").setExecutionDate(now)
+					.setAmount(1000).setDescription("Single Direct Debit to wallet").setExecutionDate(now)
 					.setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
 
 			return PaymentService.createDirectDebitToWallet(profileId, paymentFundingSourceToPayeeCreate);
@@ -832,6 +902,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
 	private static Payment createFundingSourceToPayeePayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
@@ -854,6 +925,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get all payments for a profile
 	private static PaymentPage getPayments(UUID profileId) {
 		try {
@@ -874,6 +946,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a payment belonging to a profile
 	private static Payment getPayment(UUID profileId, UUID paymentId) {
 		try {
@@ -883,6 +956,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Creates a services payment which simulates an incoming bank payment (sandbox only).
 	// Returns the ID of the saxo_transferinstruction in the DB: customate_sandbox.
@@ -898,6 +972,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get the list of non-processing dates (dates that banks cannot process payments as they are closed)
 	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate) {
 		try {
@@ -908,6 +983,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get the list of non-processing dates with a funding source ID and payee ID
 	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate, UUID fundingSourceId, UUID payeeId) {
 		try {
@@ -917,6 +993,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Get the list of non-processing dates with a funding source type and payee type
 	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate,
@@ -929,6 +1006,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Delete a payment (should return status code 204)
 	private static int deletePayment(UUID profileId, UUID paymentId) {
 		try {
@@ -938,6 +1016,7 @@ public class TestSDKApplication {
 			return 500;
 		}
 	}
+
 
 	// Get all transactions for a profile
 	private static TransactionPage getTransactions(UUID profileId) {
@@ -949,6 +1028,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a page of transactions for a profile
 	private static TransactionPage getTransactionPage(UUID profileId, int pageNum, int pageSize) {
 		try {
@@ -959,6 +1039,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a transaction belonging to a profile
 	private static Transaction getTransaction(UUID profileId, UUID transactionId) {
 		try {
@@ -968,6 +1049,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Create a webhook
 	private static Webhook createWebhook(String callbackUrl) {
@@ -980,6 +1062,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get all webhooks
 	private static WebhookPage getWebhooks() {
 		try {
@@ -989,6 +1072,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Get a page of webhooks
 	private static WebhookPage getWebhookPage(int pageNum, int pageSize) {
@@ -1000,6 +1084,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Get a webhook
 	private static Webhook getWebhook(UUID id) {
 		try {
@@ -1009,6 +1094,7 @@ public class TestSDKApplication {
 			return null;
 		}
 	}
+
 
 	// Update a webhook
 	private static Webhook updateWebhook(Webhook webhook) {
@@ -1020,6 +1106,7 @@ public class TestSDKApplication {
 		}
 	}
 
+
 	// Delete a webhook (should return status code 204)
 	private static int deleteWebhook(UUID id) {
 		try {
@@ -1029,5 +1116,6 @@ public class TestSDKApplication {
 			return 500;
 		}
 	}
+
 
 }
