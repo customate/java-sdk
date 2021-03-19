@@ -132,7 +132,7 @@ public class TestSDKApplication {
 			Payee payee1 = getPayee(profile.getId(), bankAccountPayeeProfile2.getId());
 			LOGGER.info("Get payee:\n" + payee1.asJson() + "\n");
 
-			// Rename the payee (the payee ID is NOT returned)
+			// Rename the payee (the payee ID is not returned)
 			Payee payee2 = renamePayee(profile.getId(), payee1.getId());
 			LOGGER.info("Payee, renamed to: " + payee2.getTitle() + ", ID: " + payee1.getId() + " for profile, ID: " +
 					profile.getId() + "\n" + payee2.asJson() + "\n");
@@ -142,9 +142,9 @@ public class TestSDKApplication {
 			LOGGER.info("Open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBanking.asJson() + "\n");
 			LOGGER.info("Paste the auth_uri into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
 
-			// To complete the open banking payment, user intervention is required, i.e. paste the auth_uri into a browser
-			// The following payments expect profile 1 to have funds in their GBP wallet
-			// YOU HAVE 3 MINUTES TO CONFIRM THE PAYMENT!
+			// To complete the open banking payment, user intervention is required, i.e. paste the auth_uri into a browser.
+			// The following payments expect profile 1 to have funds in their GBP wallet.
+			// Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE PAYMENT!
 			try {
 				Thread.sleep(180000); // 180 seconds
 			} catch (InterruptedException e) {
@@ -178,8 +178,8 @@ public class TestSDKApplication {
 			Payment walletToWalletPayment = createWalletToWalletPayment(profile.getId(), gbpPayeeIdProfile2);
 			LOGGER.info("Wallet to wallet payment from profile, ID: " + profile.getId() + "\n" + walletToWalletPayment.asJson() + "\n");
 
-			// Create a single direct debit to wallet payment, paying profile 2
-			// The funding source must be of type direct debit and the payee must be of type wallet
+			// Create a single direct debit to wallet payment, paying profile 2.
+			// The funding source must be of type direct debit and the payee must be of type wallet.
 			Payment directDebitToWalletPayment = createDirectDebitToWalletPayment(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
 			LOGGER.info("Single direct debit to wallet payment paying profile 2, ID: " + profile2.getId() + "\n" + directDebitToWalletPayment.asJson() + "\n");
 
@@ -205,7 +205,7 @@ public class TestSDKApplication {
 			}
 
 			// Create a services payment which simulates an incoming bank payment (sandbox only).
-			// Returns the ID of the saxo_transferinstruction in the database: customate_sandbox.
+			// Returns the ID of the saxo_transferinstruction in the sandbox database.
 			SaxoTransferInstruction saxoTransferInstruction = createServicePayment(profile.getId(), gbpPayeeIdProfile1);
 			LOGGER.info("Service payment\n" + saxoTransferInstruction.asJson() + "\n");
 
@@ -213,22 +213,22 @@ public class TestSDKApplication {
 			Payment ddToWalletPayment = createFundingSourceToPayeePayment(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
 			LOGGER.info("DD to wallet payment paying profile 2, ID: " + profile2.getId() + "\n" + ddToWalletPayment.asJson() + "\n");
 
-			// Get the list of non-processing dates (dates in the future that banks cannot process payments as they are closed)
-			// There will be 2 dates (Saturday, Sunday), or more if there's a public holiday during the week
+			// Get the list of non-processing dates (dates in the future that banks cannot process payments as they are closed).
+			// There will be 2 dates (Saturday, Sunday), or more if there's a public holiday during the week.
 			LocalDate today = LocalDate.now();
 			LocalDate nextWeek = today.plusWeeks(1);
 			LocalDate twoWeeksTime = today.plusWeeks(2);
 			NonProcessingDates nonProcessingDates = getNonProcessingDates(today, nextWeek);
 			LOGGER.info("Dates in the next 7 days when banks are closed and cannot process payments\n" + nonProcessingDates.asJson() + "\n");
 
-			// Get the list of non-processing dates, specifying the unverified direct debit funding source ID and bank account payee ID
-			// It takes 7 days to verify the funding source and 7 days to process a DD payment, so there are 14 dates
+			// Get the list of non-processing dates, specifying the unverified direct debit funding source ID and bank account payee ID.
+			// It takes 7 days to verify the funding source and 7 days to process a DD payment, so there are 14 dates.
 			NonProcessingDates nonProcessingDatesId = getNonProcessingDates(today, twoWeeksTime, fundingSource.getId(), bankAccountPayeeProfile2.getId());
 			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source and bank account payee\n" +
 					nonProcessingDatesId.asJson() + "\n");
 
-			// Get the list of non-processing dates, specifying the direct debit funding source type and bank account payee type
-			// It takes 7 days to process a DD payment, so there are 7 dates
+			// Get the list of non-processing dates, specifying the direct debit funding source type and bank account payee type.
+			// It takes 7 days to process a DD payment, so there are 7 dates.
 			NonProcessingDates nonProcessingDatesType = getNonProcessingDates(today, nextWeek, FundingSourceType.direct_debit, PayeeType.bank_account);
 			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source type and bank account payee type\n" +
 					nonProcessingDatesType.asJson() + "\n");
@@ -241,9 +241,11 @@ public class TestSDKApplication {
 			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 3);
 			LOGGER.info("Page 1 with 3 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
 
-			// Get transaction bcdd31ab-b9cb-415f-821c-74f00c9aa377 (works in the development database only)
-			Transaction transaction = getTransaction(profile.getId(), UUID.fromString("bcdd31ab-b9cb-415f-821c-74f00c9aa377"));
-			LOGGER.info("Transaction\n" + transaction.asJson() + "\n");
+			// Get a transaction
+            if (transactions.getItems().size() > 0) {
+                Transaction transaction = transactions.getItems().get(0);
+                LOGGER.info("Transaction for profile, ID: " + profile.getId() + "\n" + transaction.asJson() + "\n");
+            }
 
 			// Create a schedule, paying profile 2
 			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
@@ -575,8 +577,8 @@ public class TestSDKApplication {
 	}
 
 
-	// Create a direct debit to wallet schedule for a profile
-	// The funding source must be of type direct debit and the payee must be of type wallet
+	// Create a direct debit to wallet schedule for a profile.
+	// The funding source must be of type direct debit and the payee must be of type wallet.
 	private static Schedule createDirectDebitToWalletSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
 		try {
 			// Create some metadata (optional)
@@ -794,7 +796,7 @@ public class TestSDKApplication {
 	}
 
 
-	// Rename a payee (the payee ID is NOT returned)
+	// Rename a payee (the payee ID is not returned)
 	private static Payee renamePayee(UUID profileId, UUID payeeId) {
 		try {
 			return PayeeService.rename(profileId, payeeId, "Royal Bank of Scotland");
@@ -816,8 +818,8 @@ public class TestSDKApplication {
 	}
 
 
-	// Create an open banking payment to a profile
-	// TO COMPLETE THE PAYMENT, PASTE THE AUTH_URI THAT'S RETURNED INTO A BROWSER
+	// Create an open banking payment to a profile.
+	// TO COMPLETE THE PAYMENT, PASTE THE AUTH_URI THAT'S RETURNED INTO A BROWSER.
 	private static PaymentOpenBanking createOpenBankingPayment(UUID profileId) {
 		try {
 			// Create some metadata (optional)
@@ -881,8 +883,8 @@ public class TestSDKApplication {
 	}
 
 
-	// Create a single direct debit to wallet payment from the profile to the payee
-	// The funding source must be of type direct debit and the payee must be of type wallet
+	// Create a single direct debit to wallet payment from the profile to the payee.
+	// The funding source must be of type direct debit and the payee must be of type wallet.
 	private static Payment createDirectDebitToWalletPayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
 		try {
 			// Create some metadata (optional)
@@ -959,7 +961,7 @@ public class TestSDKApplication {
 
 
 	// Creates a services payment which simulates an incoming bank payment (sandbox only).
-	// Returns the ID of the saxo_transferinstruction in the DB: customate_sandbox.
+	// Returns the ID of the saxo_transferinstruction in the sandbox database.
 	private static SaxoTransferInstruction createServicePayment(UUID profileId, UUID payeeId) {
 		try {
 			PaymentServiceCreate paymentServiceCreate = new PaymentServiceBuilder().setAmount(5000)
