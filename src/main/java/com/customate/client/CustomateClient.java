@@ -20,7 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -262,7 +264,13 @@ public class CustomateClient {
     * @return String  The current datetime as a string.
     */
     private static String getDate() {
-        return LocalDateTime.now().toString();
+        TimeZone timeZone = TimeZone.getDefault();
+        ZoneId zoneId = timeZone.toZoneId();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+        
+        Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+        String dateTime = now.atZone(zoneId).format(dateTimeFormatter);
+        return dateTime;
     }
 
     /**

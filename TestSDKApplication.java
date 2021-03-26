@@ -45,7 +45,7 @@ public class TestSDKApplication {
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney185@music.com", "+447773100185");
+			Profile profile = createProfile("paulmccartney302@music.com", "+447773100302");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -57,7 +57,7 @@ public class TestSDKApplication {
 			LOGGER.info("Verify profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney186@music.com", "+447773200186");
+			Profile profile2 = createProfile("paulmccartney303@music.com", "+447773200303");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -242,10 +242,10 @@ public class TestSDKApplication {
 			LOGGER.info("Page 1 with 3 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
 
 			// Get a transaction
-            if (transactions.getItems().size() > 0) {
-                Transaction transaction = transactions.getItems().get(0);
-                LOGGER.info("Transaction for profile, ID: " + profile.getId() + "\n" + transaction.asJson() + "\n");
-            }
+			if (transactions.getItems().size() > 0) {
+				Transaction transaction = transactions.getItems().get(0);
+				LOGGER.info("Transaction for profile, ID: " + profile.getId() + "\n" + transaction.asJson() + "\n");
+			}
 
 			// Create a schedule, paying profile 2
 			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
@@ -828,7 +828,7 @@ public class TestSDKApplication {
 
 			PaymentOpenBankingCreate paymentOpenBankingCreate = new PaymentOpenBankingBuilder().setAmount(10000)
 					.setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
-					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96069")
+					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
 					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).build();
 
 			return PaymentService.createOpenBanking(profileId, paymentOpenBankingCreate);
