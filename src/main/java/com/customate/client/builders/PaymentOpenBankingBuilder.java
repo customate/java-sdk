@@ -22,6 +22,9 @@ public class PaymentOpenBankingBuilder {
     private String webhookUri;
     private String redirectUri;
     private JsonNode metadata;
+    private String providerId;
+    private String schemeId;
+    private String beneficiaryName;
 
     /**
      * Sets the amount.
@@ -101,12 +104,46 @@ public class PaymentOpenBankingBuilder {
     }
 
     /**
+     * Sets the provider ID.
+     *
+     * @param providerId  Provider ID.
+     * @return PaymentOpenBankingBuilder  The updated payment open banking builder.
+     */
+    public PaymentOpenBankingBuilder setProviderId(String providerId) {
+        this.providerId = providerId;
+        return this;
+    }
+
+    /**
+     * Sets the scheme ID.
+     *
+     * @param schemeId  Scheme ID.
+     * @return PaymentOpenBankingBuilder  The updated payment open banking builder.
+     */
+    public PaymentOpenBankingBuilder setSchemeId(String schemeId) {
+        this.schemeId = schemeId;
+        return this;
+    }
+
+    /**
+     * Sets the beneficiary name.
+     *
+     * @param beneficiaryName  Beneficiary name.
+     * @return PaymentOpenBankingBuilder  The updated payment open banking builder.
+     */
+    public PaymentOpenBankingBuilder setBeneficiaryName(String beneficiaryName) {
+        this.beneficiaryName = beneficiaryName;
+        return this;
+    }
+
+    /**
      * Builds an open banking payment.
      *
      * @return PaymentOpenBankingCreate  The open banking payment.
      */
     public PaymentOpenBankingCreate build() {
-        return new PaymentOpenBankingCreate(amount, description, country, currency, webhookUri, redirectUri, metadata);
+        return new PaymentOpenBankingCreate(amount, description, country, currency, webhookUri,
+                                            redirectUri, metadata, providerId, schemeId, beneficiaryName);
     }
 
 }

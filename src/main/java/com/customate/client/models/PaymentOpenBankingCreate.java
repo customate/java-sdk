@@ -40,6 +40,12 @@ public class PaymentOpenBankingCreate extends BaseModel {
     private String redirectUri;
     @JsonProperty("metadata")
     private JsonNode metadata;
+    @JsonProperty("provider_id")
+    private String providerId;
+    @JsonProperty("scheme_id")
+    private String schemeId;
+    @JsonProperty("beneficiary_name")
+    private String beneficiaryName;
 
     /**
      * Default constructor.
@@ -56,9 +62,12 @@ public class PaymentOpenBankingCreate extends BaseModel {
      * @param webhookUri  Webhook URI.
      * @param redirectUri  Redirect URI.
      * @param metadata  Metadata.
+     * @param providerId  Provider ID (the bank).
+     * @param schemeId  Scheme ID (faster_payments_service for GBP, sepa_credit_transfer_instant for EUR)
+     * @param beneficiaryName  The beneficiary.
      */
-    public PaymentOpenBankingCreate(long amount, String description, String country, Currency currency,
-                                    String webhookUri, String redirectUri, JsonNode metadata) {
+    public PaymentOpenBankingCreate(long amount, String description, String country, Currency currency, String webhookUri,
+                                    String redirectUri, JsonNode metadata, String providerId, String schemeId, String beneficiaryName) {
         this.amount = amount;
         this.description = description;
         this.country = country;
@@ -66,6 +75,9 @@ public class PaymentOpenBankingCreate extends BaseModel {
         this.webhookUri = webhookUri;
         this.redirectUri = redirectUri;
         this.metadata = metadata;
+        this.providerId = providerId;
+        this.schemeId = schemeId;
+        this.beneficiaryName = beneficiaryName;
     }
 
 }

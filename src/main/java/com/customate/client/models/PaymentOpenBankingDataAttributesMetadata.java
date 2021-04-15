@@ -26,8 +26,8 @@ public class PaymentOpenBankingDataAttributesMetadata extends BaseModel {
     private String webhookUri;
     @JsonProperty("redirect_url")
     private String redirectUrl;
-    @JsonProperty("auth_uri")
-    private String authUri;
+    @JsonProperty("uri")
+    private String uri;
     /**
      * ISO 2-digit country code.
      */

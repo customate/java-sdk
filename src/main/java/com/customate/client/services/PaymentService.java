@@ -1,6 +1,7 @@
 package com.customate.client.services;
 
 import com.customate.client.CustomateClient;
+import com.customate.client.enums.Currency;
 import com.customate.client.enums.FundingSourceType;
 import com.customate.client.enums.PayeeType;
 import com.customate.client.exceptions.ApiException;
@@ -77,6 +78,25 @@ public class PaymentService {
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, Payment.class);
+    }
+
+    /**
+     * Gets open banking providers.
+     *
+     * @param currency  Currency.
+     * @param country  2-digit ISO country code.
+     * @return PaymentOpenBankingProviderPage  The list of providers.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static PaymentOpenBankingProviderPage getOpenBankingProviders(Currency currency, String country)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.get("open_banking_providers?currency=" + currency.toString() + "&country=" + country);
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, PaymentOpenBankingProviderPage.class);
     }
 
     /**

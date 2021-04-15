@@ -20,7 +20,7 @@ import java.util.UUID;
  * Tests all the endpoints in the Customate Java SDK.
  *
  * One method, createOpenBankingPayment(), loads funds into a user's wallet and requires user intervention:
- * Paste the auth_uri into a browser, enter customer no. 123456789012, PIN 572, password 436 and confirm the payment.
+ * Paste the URI into a browser, enter customer no. 123456789012, PIN 572, password 436 and confirm the payment.
  * You have 3 minutes to do this (configurable below). The other payments rely on funds being available.
  *
  * Date: 08-Mar-21
@@ -45,7 +45,7 @@ public class TestSDKApplication {
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney302@music.com", "+447773100302");
+			Profile profile = createProfile("paulmccartney314@music.com", "+447773100314");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -57,7 +57,7 @@ public class TestSDKApplication {
 			LOGGER.info("Verify profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney303@music.com", "+447773200303");
+			Profile profile2 = createProfile("paulmccartney315@music.com", "+447773200315");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -137,10 +137,14 @@ public class TestSDKApplication {
 			LOGGER.info("Payee, renamed to: " + payee2.getTitle() + ", ID: " + payee1.getId() + " for profile, ID: " +
 					profile.getId() + "\n" + payee2.asJson() + "\n");
 
+			// Get open banking providers in the UK
+			PaymentOpenBankingProviderPage paymentOpenBankingProviderPage = getOpenBankingProviders(Currency.GBP, "GB");
+			LOGGER.info("Open banking providers (banks) in the UK: " + "\n" + paymentOpenBankingProviderPage.asJson() + "\n");
+
 			// Create an open banking payment to load funds into the profile
 			PaymentOpenBanking paymentOpenBanking = createOpenBankingPayment(profile.getId());
 			LOGGER.info("Open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBanking.asJson() + "\n");
-			LOGGER.info("Paste the auth_uri into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
+			LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
 
 			// To complete the open banking payment, user intervention is required, i.e. paste the auth_uri into a browser.
 			// The following payments expect profile 1 to have funds in their GBP wallet.
@@ -818,8 +822,19 @@ public class TestSDKApplication {
 	}
 
 
+	// Get open banking providers
+	private static PaymentOpenBankingProviderPage getOpenBankingProviders(Currency currency, String country) {
+		try {
+			return PaymentService.getOpenBankingProviders(currency, country);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
 	// Create an open banking payment to a profile.
-	// TO COMPLETE THE PAYMENT, PASTE THE AUTH_URI THAT'S RETURNED INTO A BROWSER.
+	// TO COMPLETE THE PAYMENT, PASTE THE URI THAT'S RETURNED INTO A BROWSER.
 	private static PaymentOpenBanking createOpenBankingPayment(UUID profileId) {
 		try {
 			// Create some metadata (optional)
@@ -829,7 +844,8 @@ public class TestSDKApplication {
 			PaymentOpenBankingCreate paymentOpenBankingCreate = new PaymentOpenBankingBuilder().setAmount(10000)
 					.setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
 					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
-					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).build();
+					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("ob-sandbox-natwest")
+					.setSchemeId("faster_payments_service").setBeneficiaryName("Letting A Property").build();
 
 			return PaymentService.createOpenBanking(profileId, paymentOpenBankingCreate);
 		} catch (Exception e) {
