@@ -44,6 +44,12 @@ public class PaymentOpenBankingCreate extends BaseModel {
     private String providerId;
     @JsonProperty("scheme_id")
     private String schemeId;
+    //@JsonProperty("fee_option_id")
+    //private String feeOptionId;
+    //@JsonProperty("remitter_iban")
+    //private String remitterIban;
+    @JsonProperty("remitter_name")
+    private String remitterName;
     @JsonProperty("beneficiary_name")
     private String beneficiaryName;
 
@@ -64,10 +70,12 @@ public class PaymentOpenBankingCreate extends BaseModel {
      * @param metadata  Metadata.
      * @param providerId  Provider ID (the bank).
      * @param schemeId  Scheme ID (faster_payments_service for GBP, sepa_credit_transfer_instant for EUR)
-     * @param beneficiaryName  The beneficiary.
+     * @param remitterName  Payer name.
+     * @param beneficiaryName  Beneficiary name.
      */
     public PaymentOpenBankingCreate(long amount, String description, String country, Currency currency, String webhookUri,
-                                    String redirectUri, JsonNode metadata, String providerId, String schemeId, String beneficiaryName) {
+                                    String redirectUri, JsonNode metadata, String providerId, String schemeId,
+                                    String remitterName, String beneficiaryName) {
         this.amount = amount;
         this.description = description;
         this.country = country;
@@ -77,6 +85,9 @@ public class PaymentOpenBankingCreate extends BaseModel {
         this.metadata = metadata;
         this.providerId = providerId;
         this.schemeId = schemeId;
+        //this.feeOptionId = feeOptionId;
+        //this.remitterIban = remitterIban;
+        this.remitterName = remitterName;
         this.beneficiaryName = beneficiaryName;
     }
 

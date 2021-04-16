@@ -45,7 +45,7 @@ public class TestSDKApplication {
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney314@music.com", "+447773100314");
+			Profile profile = createProfile("paulmccartney320@music.com", "+447773100320");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -57,7 +57,7 @@ public class TestSDKApplication {
 			LOGGER.info("Verify profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney315@music.com", "+447773200315");
+			Profile profile2 = createProfile("paulmccartney321@music.com", "+447773200321");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -841,11 +841,12 @@ public class TestSDKApplication {
 			JsonNode metadata = JsonHelper.createEmptyObjectNode();
 			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
 
-			PaymentOpenBankingCreate paymentOpenBankingCreate = new PaymentOpenBankingBuilder().setAmount(10000)
-					.setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
+			PaymentOpenBankingCreate paymentOpenBankingCreate = new PaymentOpenBankingBuilder()
+					.setAmount(10000).setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
 					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
 					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("ob-sandbox-natwest")
-					.setSchemeId("faster_payments_service").setBeneficiaryName("Letting A Property").build();
+					.setSchemeId("faster_payments_service").setRemitterName("Paul McCartney")
+					.setBeneficiaryName("Tesco LTD").build();
 
 			return PaymentService.createOpenBanking(profileId, paymentOpenBankingCreate);
 		} catch (Exception e) {
