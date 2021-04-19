@@ -100,20 +100,42 @@ public class PaymentService {
     }
 
     /**
-     * Creates an open banking payment (the JSON format is different when creating and getting payments).
+     * Creates a GBP open banking payment (the JSON format is different when creating and getting payments).
      *
      * @param profileId  Profile ID.
-     * @param paymentOpenBankingCreate  The open banking payment to create.
+     * @param paymentOpenBankingGbpCreate  The GBP open banking payment to create.
      * @return PaymentOpenBanking  The open banking payment.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
      * @throws InterruptedException  If there was an interrupted exception sending the request.
      * @throws ApiException  If the API returned errors.
      */
-    public static PaymentOpenBanking createOpenBanking(UUID profileId, PaymentOpenBankingCreate paymentOpenBankingCreate)
+    public static PaymentOpenBanking createOpenBankingGbp(UUID profileId, PaymentOpenBankingGbpCreate paymentOpenBankingGbpCreate)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
-        HttpResponse<String> response = CustomateClient.post("profiles/" + profileId + "/open_banking_to_wallet_payments",
-                                                                paymentOpenBankingCreate.asJson());
+        HttpResponse<String> response =
+                CustomateClient.post("profiles/" + profileId + "/open_banking_to_wallet_payments",
+                                     paymentOpenBankingGbpCreate.asJson());
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, PaymentOpenBanking.class);
+    }
+
+    /**
+     * Creates a Euro open banking payment (the JSON format is different when creating and getting payments).
+     *
+     * @param profileId  Profile ID.
+     * @param paymentOpenBankingEurCreate  The Euro open banking payment to create.
+     * @return PaymentOpenBanking  The open banking payment.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static PaymentOpenBanking createOpenBankingEur(UUID profileId, PaymentOpenBankingEurCreate paymentOpenBankingEurCreate)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response =
+                CustomateClient.post("profiles/" + profileId + "/open_banking_to_wallet_payments",
+                                     paymentOpenBankingEurCreate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, PaymentOpenBanking.class);
