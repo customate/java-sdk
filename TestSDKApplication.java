@@ -20,7 +20,7 @@ import java.util.UUID;
  * Tests all the endpoints in the Customate Java SDK.
  *
  * One method, createOpenBankingPayment(), loads funds into a user's wallet and requires user intervention:
- * Paste the auth_uri into a browser, enter customer no. 123456789012, PIN 572, password 436 and confirm the payment.
+ * Paste the URI into a browser, enter customer no. 123456789012, PIN 572, password 436 and confirm the payment.
  * You have 3 minutes to do this (configurable below). The other payments rely on funds being available.
  *
  * Date: 08-Mar-21
@@ -45,7 +45,7 @@ public class TestSDKApplication {
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney302@music.com", "+447773100302");
+			Profile profile = createProfile("paulmccartney379@music.com", "+447773100379");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -54,10 +54,10 @@ public class TestSDKApplication {
 
 			// Get the newly-created profile
 			Profile verifiedProfile = getProfile(profile.getId());
-			LOGGER.info("Verify profile\n" + verifiedProfile.asJson() + "\n");
+			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney303@music.com", "+447773200303");
+			Profile profile2 = createProfile("paulmccartney380@music.com", "+447773200380");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -137,10 +137,14 @@ public class TestSDKApplication {
 			LOGGER.info("Payee, renamed to: " + payee2.getTitle() + ", ID: " + payee1.getId() + " for profile, ID: " +
 					profile.getId() + "\n" + payee2.asJson() + "\n");
 
-			// Create an open banking payment to load funds into the profile
-			PaymentOpenBanking paymentOpenBanking = createOpenBankingPayment(profile.getId());
+			// Get open banking providers in the UK
+			PaymentOpenBankingProviderPage paymentOpenBankingProviderPage = getOpenBankingProviders(Currency.GBP, "GB");
+			LOGGER.info("Open banking providers (banks) in the UK: " + "\n" + paymentOpenBankingProviderPage.asJson() + "\n");
+
+			// Create a GBP open banking payment to load funds into the profile
+			PaymentOpenBanking paymentOpenBanking = createGbpOpenBankingPayment(profile.getId());
 			LOGGER.info("Open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBanking.asJson() + "\n");
-			LOGGER.info("Paste the auth_uri into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
+			LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
 
 			// To complete the open banking payment, user intervention is required, i.e. paste the auth_uri into a browser.
 			// The following payments expect profile 1 to have funds in their GBP wallet.
@@ -242,10 +246,10 @@ public class TestSDKApplication {
 			LOGGER.info("Page 1 with 3 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
 
 			// Get a transaction
-			if (transactions.getItems().size() > 0) {
-				Transaction transaction = transactions.getItems().get(0);
-				LOGGER.info("Transaction for profile, ID: " + profile.getId() + "\n" + transaction.asJson() + "\n");
-			}
+            if (transactions.getItems().size() > 0) {
+                Transaction transaction = transactions.getItems().get(0);
+                LOGGER.info("Transaction for profile, ID: " + profile.getId() + "\n" + transaction.asJson() + "\n");
+            }
 
 			// Create a schedule, paying profile 2
 			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
@@ -818,20 +822,53 @@ public class TestSDKApplication {
 	}
 
 
-	// Create an open banking payment to a profile.
-	// TO COMPLETE THE PAYMENT, PASTE THE AUTH_URI THAT'S RETURNED INTO A BROWSER.
-	private static PaymentOpenBanking createOpenBankingPayment(UUID profileId) {
+	// Get open banking providers
+	private static PaymentOpenBankingProviderPage getOpenBankingProviders(Currency currency, String country) {
+		try {
+			return PaymentService.getOpenBankingProviders(currency, country);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+    // Create an open banking payment to a profile.
+    private static PaymentOpenBanking createGbpOpenBankingPayment(UUID profileId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+            PaymentOpenBankingGbpCreate paymentOpenBankingGbpCreate = new PaymentOpenBankingGbpBuilder()
+                    .setAmount(10000).setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
+                    .setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
+                    .setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("ob-sandbox-natwest")
+                    .setPayerName("Paul McCartney").setBeneficiaryName("Tesco LTD").build();
+
+            return PaymentService.createOpenBankingGbp(profileId, paymentOpenBankingGbpCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Create a Euro open banking payment to a profile (will fail as it's not using a real IBAN).
+	private static PaymentOpenBanking createEurOpenBankingPayment(UUID profileId) {
 		try {
 			// Create some metadata (optional)
 			JsonNode metadata = JsonHelper.createEmptyObjectNode();
 			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
 
-			PaymentOpenBankingCreate paymentOpenBankingCreate = new PaymentOpenBankingBuilder().setAmount(10000)
-					.setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
+			PaymentOpenBankingEurCreate paymentOpenBankingEurCreate = new PaymentOpenBankingEurBuilder()
+					.setAmount(10000).setDescription("Deposit for Flat 1").setCountry("ES").setCurrency(Currency.EUR)
 					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
-					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).build();
+					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("xs2a-redsys-banco-santander")
+					.setPayerIban("DE05202208000090025782").setPayerName("Paul McCartney")
+					.setBeneficiaryName("Tesco LTD").build();
 
-			return PaymentService.createOpenBanking(profileId, paymentOpenBankingCreate);
+			return PaymentService.createOpenBankingEur(profileId, paymentOpenBankingEurCreate);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return null;
