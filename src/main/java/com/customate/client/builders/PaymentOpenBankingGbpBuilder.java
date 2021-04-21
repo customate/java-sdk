@@ -25,7 +25,7 @@ public class PaymentOpenBankingGbpBuilder {
     private JsonNode metadata;
     private String providerId;
     private OpenBankingSchemeId schemeId;
-    private String remitterName;
+    private String payerName;
     private String beneficiaryName;
 
     /**
@@ -128,13 +128,13 @@ public class PaymentOpenBankingGbpBuilder {
     }
 
     /**
-     * Sets the remitter name.
+     * Sets the payer name.
      *
-     * @param remitterName  Remitter name.
+     * @param payerName  Payer name.
      * @return PaymentOpenBankingGbpBuilder  The updated payment open banking builder.
      */
-    public PaymentOpenBankingGbpBuilder setRemitterName(String remitterName) {
-        this.remitterName = remitterName;
+    public PaymentOpenBankingGbpBuilder setPayerName(String payerName) {
+        this.payerName = payerName;
         return this;
     }
 
@@ -156,7 +156,7 @@ public class PaymentOpenBankingGbpBuilder {
      */
     public PaymentOpenBankingGbpCreate build() {
         return new PaymentOpenBankingGbpCreate(amount, description, country, currency, webhookUri, redirectUri, metadata,
-                                               providerId, schemeId, remitterName, beneficiaryName);
+                                               providerId, schemeId, payerName, beneficiaryName);
     }
 
 }

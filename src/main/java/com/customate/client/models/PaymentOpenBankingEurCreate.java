@@ -48,10 +48,10 @@ public class PaymentOpenBankingEurCreate extends BaseModel {
     private OpenBankingSchemeId schemeId;
     @JsonProperty("fee_option_id")
     private OpenBankingFeeOptionId feeOptionId;
-    @JsonProperty("remitter_iban")
-    private String remitterIban;
-    @JsonProperty("remitter_name")
-    private String remitterName;
+    @JsonProperty("payer_iban")
+    private String payerIban;
+    @JsonProperty("payer_name")
+    private String payerName;
     @JsonProperty("beneficiary_name")
     private String beneficiaryName;
 
@@ -73,14 +73,14 @@ public class PaymentOpenBankingEurCreate extends BaseModel {
      * @param providerId  Provider ID (the bank).
      * @param schemeId  Scheme ID.
      * @param feeOptionId  Fee option ID.
-     * @param remitterIban  Remitter's IBAN.
-     * @param remitterName  Payer name.
+     * @param payerIban  Payer IBAN.
+     * @param payerName  Payer name.
      * @param beneficiaryName  Beneficiary name.
      */
     public PaymentOpenBankingEurCreate(long amount, String description, String country, Currency currency,
                                        String webhookUri, String redirectUri, JsonNode metadata, String providerId,
                                        OpenBankingSchemeId schemeId, OpenBankingFeeOptionId feeOptionId,
-                                       String remitterIban, String remitterName, String beneficiaryName) {
+                                       String payerIban, String payerName, String beneficiaryName) {
         this.amount = amount;
         this.description = description;
         this.country = country;
@@ -91,8 +91,8 @@ public class PaymentOpenBankingEurCreate extends BaseModel {
         this.providerId = providerId;
         this.schemeId = schemeId;
         this.feeOptionId = feeOptionId;
-        this.remitterIban = remitterIban;
-        this.remitterName = remitterName;
+        this.payerIban = payerIban;
+        this.payerName = payerName;
         this.beneficiaryName = beneficiaryName;
     }
 

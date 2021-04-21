@@ -27,8 +27,8 @@ public class PaymentOpenBankingEurBuilder {
     private String providerId;
     private OpenBankingSchemeId schemeId;
     private OpenBankingFeeOptionId feeOptionId;
-    private String remitterIban;
-    private String remitterName;
+    private String payerIban;
+    private String payerName;
     private String beneficiaryName;
 
     /**
@@ -142,24 +142,24 @@ public class PaymentOpenBankingEurBuilder {
     }
 
     /**
-     * Sets the remitter IBAN.
+     * Sets the payer IBAN.
      *
-     * @param remitterIban  Remitter IBAN.
+     * @param payerIban  Payer IBAN.
      * @return PaymentOpenBankingEurBuilder  The updated payment open banking builder.
      */
-    public PaymentOpenBankingEurBuilder setRemitterIban(String remitterIban) {
-        this.remitterIban = remitterIban;
+    public PaymentOpenBankingEurBuilder setPayerIban(String payerIban) {
+        this.payerIban = payerIban;
         return this;
     }
 
     /**
-     * Sets the remitter name.
+     * Sets the payer name.
      *
-     * @param remitterName  Remitter name.
+     * @param payerName  Payer name.
      * @return PaymentOpenBankingEurBuilder  The updated payment open banking builder.
      */
-    public PaymentOpenBankingEurBuilder setRemitterName(String remitterName) {
-        this.remitterName = remitterName;
+    public PaymentOpenBankingEurBuilder setPayerName(String payerName) {
+        this.payerName = payerName;
         return this;
     }
 
@@ -181,8 +181,8 @@ public class PaymentOpenBankingEurBuilder {
      */
     public PaymentOpenBankingEurCreate build() {
         return new PaymentOpenBankingEurCreate(amount, description, country, currency, webhookUri, redirectUri,
-                                               metadata, providerId, schemeId, feeOptionId, remitterIban,
-                                               remitterName, beneficiaryName);
+                                               metadata, providerId, schemeId, feeOptionId, payerIban,
+                                               payerName, beneficiaryName);
     }
 
 }

@@ -45,8 +45,8 @@ public class PaymentOpenBankingGbpCreate extends BaseModel {
     private String providerId;
     @JsonProperty("scheme_id")
     private OpenBankingSchemeId schemeId;
-    @JsonProperty("remitter_name")
-    private String remitterName;
+    @JsonProperty("payer_name")
+    private String payerName;
     @JsonProperty("beneficiary_name")
     private String beneficiaryName;
 
@@ -67,12 +67,12 @@ public class PaymentOpenBankingGbpCreate extends BaseModel {
      * @param metadata  Metadata.
      * @param providerId  Provider ID (the bank).
      * @param schemeId  Scheme ID.
-     * @param remitterName  Payer name.
+     * @param payerName  Payer name.
      * @param beneficiaryName  Beneficiary name.
      */
     public PaymentOpenBankingGbpCreate(long amount, String description, String country, Currency currency,
                                        String webhookUri, String redirectUri, JsonNode metadata, String providerId,
-                                       OpenBankingSchemeId schemeId, String remitterName, String beneficiaryName) {
+                                       OpenBankingSchemeId schemeId, String payerName, String beneficiaryName) {
         this.amount = amount;
         this.description = description;
         this.country = country;
@@ -82,7 +82,7 @@ public class PaymentOpenBankingGbpCreate extends BaseModel {
         this.metadata = metadata;
         this.providerId = providerId;
         this.schemeId = schemeId;
-        this.remitterName = remitterName;
+        this.payerName = payerName;
         this.beneficiaryName = beneficiaryName;
     }
 
