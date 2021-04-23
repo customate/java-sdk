@@ -32,32 +32,32 @@ import java.util.UUID;
 @SpringBootApplication
 public class TestSDKApplication {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
 
-	// Tests all the endpoints
-	public static void main(String[] args) {
-		SpringApplication.run(TestSDKApplication.class, args);
-		try {
-			LOGGER.info("\n");
+    // Tests all the endpoints
+    public static void main(String[] args) {
+        SpringApplication.run(TestSDKApplication.class, args);
+        try {
+            LOGGER.info("\n");
 
-			// Get the API status
-			Status status = getStatus();
-			LOGGER.info("API Status\n" + status.asJson() + "\n");
+            // Get the API status
+            Status status = getStatus();
+            LOGGER.info("API Status\n" + status.asJson() + "\n");
 
-			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("paulmccartney379@music.com", "+447773100379");
-			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
+            // Create a profile - emails and phone number must be unique in the database
+            Profile profile = createProfile("johnlennon514@music.com", "+447773200514");
+            LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
-			// Force-verify the profile
-			VerificationResponse verificationResponse = forceVerifyProfile(profile);
-			LOGGER.info("Force-verify of profile\n" + verificationResponse.asJson() + "\n");
+            // Force-verify the profile
+            VerificationResponse verificationResponse = forceVerifyProfile(profile);
+            LOGGER.info("Force-verify of profile\n" + verificationResponse.asJson() + "\n");
 
 			// Get the newly-created profile
 			Profile verifiedProfile = getProfile(profile.getId());
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney380@music.com", "+447773200380");
+			Profile profile2 = createProfile("paulmccartney386@music.com", "+447773200386");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -142,8 +142,8 @@ public class TestSDKApplication {
 			LOGGER.info("Open banking providers (banks) in the UK: " + "\n" + paymentOpenBankingProviderPage.asJson() + "\n");
 
 			// Create a GBP open banking payment to load funds into the profile
-			PaymentOpenBanking paymentOpenBanking = createGbpOpenBankingPayment(profile.getId());
-			LOGGER.info("Open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBanking.asJson() + "\n");
+			PaymentOpenBanking paymentOpenBankingGbp = createGbpOpenBankingPayment(profile.getId());
+			LOGGER.info("GBP open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingGbp.asJson() + "\n");
 			LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
 
 			// To complete the open banking payment, user intervention is required, i.e. paste the auth_uri into a browser.
@@ -154,6 +154,14 @@ public class TestSDKApplication {
 			} catch (InterruptedException e) {
 				LOGGER.error("InterruptedException: " + e.getMessage());
 			}
+
+            // Create an EUR open banking payment to load funds into the profile (will fail as the IBAN is not real)
+            PaymentOpenBanking paymentOpenBankingEur = createEurOpenBankingPayment(profile.getId());
+			if (paymentOpenBankingEur != null) {
+                LOGGER.info("EUR open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingEur.asJson() + "\n");
+            } else {
+                LOGGER.info("EUR Open banking to wallet payment failed (invalid IBAN) for profile, ID: " + profile.getId() + "\n");
+            }
 
 			// Create a GBP wallet to bank account payment from profile 1 to profile 2
 			Payment walletToBankAccountPayment = createWalletToBankAccountPayment(profile.getId(), bankAccountPayeeProfile2.getId());
@@ -339,498 +347,498 @@ public class TestSDKApplication {
 			LOGGER.info("Delete payee, ID: " + bankAccountPayeeProfile2.getId() + " from profile, ID: " +
 					profile.getId() + ", status code: " + statusCode + "\n");
 
-			// Delete the profiles
-			statusCode = deleteProfile(profile.getId());
-			LOGGER.info("Delete profile, ID: " + profile.getId() + ", status code: " + statusCode + "\n");
-
-			statusCode = deleteProfile(profile2.getId());
-			LOGGER.info("Delete profile, ID: " + profile2.getId() + ", status code: " + statusCode + "\n");
-
-		} catch (RuntimeException e) {
-			LOGGER.error("Exception: " + e.getMessage());
-		}
-	}
-
-
-	/**
-	 * These methods call the API services. Use these examples in your code.
-	 */
-
-	// Get the API status
-	private static Status getStatus() {
-		try {
-			return StatusService.get();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a profile
-	private static Profile createProfile(String email, String phoneNumber) {
-		try {
-			// Create an address (required fields: line1, city, locality, postcode)
-			Address address = new AddressBuilder().setLine1("Westminster Cathedral").setLine2("Victoria Street")
-					.setLine3("Westminster").setCity("London").setLocality("Greater London").setPostcode("SW1P 1LT")
-					.setCountry("GB").build();
-
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-			// Create a profile (required fields: type, firstName, lastName, email, phoneNumber, address)
-			Profile newProfile = new ProfileBuilder()
-					.setType(ProfileType.personal).setTitle(Title.mr).setFirstName("James").setMiddleName("Paul")
-					.setLastName("McCartney").setEmail(email).setPhoneNumber(phoneNumber)
-					.setBirthDate("1942-06-18").setAddress(address).setGender(Gender.male).setMetadata(metadata).build();
-
-			return ProfileService.create(newProfile);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Force-verify a profile (doesn't check the country of birth, mother's maiden name, passport or driving licence)
-	private static VerificationResponse forceVerifyProfile(Profile profile) {
-		try {
-			return ProfileService.forceVerify(profile.getId());
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Verify a profile (check the country of birth, mother's maiden name, passport or driving licence - will fail as this is dummy data)
-	private static VerificationResponse verifyProfile(Profile profile) {
-		try {
-			Passport passport = new PassportBuilder().setOriginCountry("GB")
-					.setNumber("PD12345678IRL1234567M1234567<<<<<<<<<<<<<<<0").setExpiryDate("2031-09-23").build();
-			DriverLicence driverLicence = new DriverLicenceBuilder().setNumber("EUEGE123456BM9NM")
-					.setPostcode("B126DY").setIssueDate("2011-10-27").build();
-			VerificationRequest verificationRequest = new VerificationRequestBuilder().setBirthCountry("IE")
-					.setMotherMaidenName("Smithy").setPassport(passport).setDriverLicence(driverLicence).build();
-			return ProfileService.verify(profile.getId(), verificationRequest);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a profile
-	private static Profile getProfile(UUID id) {
-		try {
-			return ProfileService.get(id);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Update a profile
-	private static Profile updateProfile(Profile profile) {
-		try {
-			// Update a profile's address to Westminster Abbey
-			Address address = new AddressBuilder().setLine1("Westminster Abbey").setLine2("Victoria Street")
-					.setLine3("Westminster").setCity("London").setLocality("Greater London").setPostcode("SW1P 1LT")
-					.setCountry("GB").build();
-			profile.setAddress(address);
-			return ProfileService.update(profile);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get all profiles
-	private static ProfilePage getProfiles() {
-		try {
-			// Get all profiles
-			return ProfileService.getAll();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a page of profiles
-	private static ProfilePage getProfilePage(int pageNum, int pageSize) {
-		try {
-			// Get the first page of profiles, with 4 per page
-			return ProfileService.getPage(pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Delete a profile (should return status code 204)
-	private static int deleteProfile(UUID id) {
-		try {
-			return ProfileService.delete(id);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return 500;
-		}
-	}
-
-
-	// Get all wallets for a profile
-	private static WalletPage getWallets(UUID profileId) {
-		try {
-			return WalletService.getAll(profileId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a page of wallets for a profile
-	private static WalletPage getWalletPage(UUID profileId, int pageNum, int pageSize) {
-		try {
-			return WalletService.getPage(profileId, pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get all schedules for a profile
-	private static SchedulePage getSchedules(UUID profileId) {
-		try {
-			return ScheduleService.getAll(profileId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a page of schedules for a profile
-	private static SchedulePage getSchedulePage(UUID profileId, int pageNum, int pageSize) {
-		try {
-			return ScheduleService.getPage(profileId, pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a schedule for a profile
-	private static Schedule getSchedule(UUID profileId, UUID scheduleId) {
-		try {
-			return ScheduleService.get(profileId, scheduleId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a schedule for a profile
-	private static Schedule createSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
-		try {
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-			// Append the datetime to the schedule to make it unique
-			Date date = new Date();
-			String today = new SimpleDateFormat("yyyy-MM-dd").format(date);
-			String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
-			String title = "Test Daily Schedule " + now;
-
-			ScheduleCreate scheduleCreate = new ScheduleBuilder().setTitle(title).setCurrency(Currency.GBP)
-					.setSchedulePurpose(SchedulePurpose.pay).setSchedulePeriod(SchedulePeriod.daily).setNumberOfPayments(7)
-					.setRegularPaymentStartDate(today).setRegularPaymentAmount(500).setDepositPaymentDate(today)
-					.setDepositPaymentAmount(100).setDescription("7 day schedule paying £5 a day with a deposit of £1")
-					.setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
-
-			return ScheduleService.create(profileId, scheduleCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Updates a schedule
-	private static Schedule updateSchedule(UUID profileId, Schedule schedule) {
-		try {
-			// Set the number of payments to 14 and change the title
-			String newTitle = "Updated " + schedule.getTitle();
-			ScheduleUpdate scheduleUpdate = new ScheduleUpdateBuilder().copySchedule(schedule).setNumberOfPayments(14)
-					.setTitle(newTitle).setDescription("14 day schedule paying £5 a day with a deposit of £1").build();
-
-			return ScheduleService.update(profileId, schedule.getId(), scheduleUpdate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a direct debit to wallet schedule for a profile.
-	// The funding source must be of type direct debit and the payee must be of type wallet.
-	private static Schedule createDirectDebitToWalletSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
-		try {
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-			// Append the datetime to the schedule to make it unique
-			Date date = new Date();
-			String today = new SimpleDateFormat("yyyy-MM-dd").format(date);
-			String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
-			String title = "Test Daily Direct Debit to Wallet Schedule " + now;
-
-			ScheduleDDToWalletCreate scheduleDDToWalletCreate = new ScheduleDDToWalletBuilder().setTitle(title)
-					.setSchedulePurpose(SchedulePurpose.pay).setSchedulePeriod(SchedulePeriod.daily).setNumberOfPayments(7)
-					.setRegularPaymentStartDate(today).setRegularPaymentAmount(500).setDepositPaymentDate(today)
-					.setDepositPaymentAmount(100).setDescription("7 day DD to wallet schedule paying £5 a day with a deposit of £1")
-					.setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
-
-			return ScheduleService.createDirectDebitToWallet(profileId, scheduleDDToWalletCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Pay overdue payments for a schedule
-	private static int payOverduePayments(UUID profileId, Schedule schedule) {
-		try {
-			return ScheduleService.payOverduePayments(profileId, schedule);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return 500;
-		}
-	}
-
-
-	// Cancel a schedule (should return status code 204)
-	private static int cancelSchedule(UUID profileId, UUID scheduleId) {
-		try {
-			return ScheduleService.cancel(profileId, scheduleId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return 500;
-		}
-	}
-
-
-	// Get the funding sources for a profile
-	private static FundingSourcePage getFundingSources(UUID profileId) {
-		try {
-			return FundingSourceService.getAll(profileId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a page of funding sources for a profile
-	private static FundingSourcePage getFundingSourcePage(UUID profileId, int pageNum, int pageSize) {
-		try {
-			return FundingSourceService.getPage(profileId, pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a funding source for a profile
-	private static FundingSource createFundingSource(UUID profileId) {
-		try {
-			FundingSourcePayer fundingSourcePayer = new FundingSourcePayerBuilder().setFullName("Jack Smith").build();
-
-			FundingSourceAccount fundingSourceAccount =
-					new FundingSourceAccountBuilder().setSortCode("040004").setAccountNumber("37618166").build();
-
-			FundingSourceCreateData fundingSourceCreateData = new FundingSourceDataBuilder()
-					.setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourcePayer)
-					.setFundingSourceAccount(fundingSourceAccount).build();
-
-			FundingSourceCreate fundingSourceCreate =
-					new FundingSourceBuilder().setTitle("Direct Debit Source")
-							.setCurrency(Currency.GBP).setFundingSourceType(FundingSourceType.direct_debit)
-							.setFundingSourceCreateData(fundingSourceCreateData).build();
-
-			return FundingSourceService.create(profileId, fundingSourceCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a direct debit funding source for a profile
-	private static FundingSource createDirectDebitFundingSource(UUID profileId) {
-		try {
-			FundingSourcePayer fundingSourcePayer = new FundingSourcePayerBuilder().setFullName("Jack Smith").build();
-
-			FundingSourceAccount fundingSourceAccount =
-					new FundingSourceAccountBuilder().setSortCode("040004").setAccountNumber("37618166").build();
-
-			FundingSourceCreateData fundingSourceCreateData = new FundingSourceDataBuilder()
-					.setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourcePayer)
-					.setFundingSourceAccount(fundingSourceAccount).build();
-
-			FundingSourceDDCreate fundingSourceDDCreate =
-					new FundingSourceDDBuilder().setTitle("Direct Debit Source 2")
-							.setCurrency(Currency.GBP).setFundingSourceCreateData(fundingSourceCreateData).build();
-
-			return FundingSourceService.createDirectDebit(profileId, fundingSourceDDCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a funding source
-	private static FundingSource getFundingSource(UUID profileId, UUID fundingSourceId) {
-		try {
-			return FundingSourceService.get(profileId, fundingSourceId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Rename a funding source
-	private static FundingSource renameFundingSource(UUID profileId, UUID fundingSourceId) {
-		try {
-			return FundingSourceService.rename(profileId, fundingSourceId, "Direct Debit Source Modified");
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Delete a funding source (should return status code 204)
-	private static int deleteFundingSource(UUID profileId, UUID fundingSourceId) {
-		try {
-			return FundingSourceService.delete(profileId, fundingSourceId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return 500;
-		}
-	}
-
-
-	// Get all payees for a profile
-	private static PayeePage getPayees(UUID profileId) {
-		try {
-			return PayeeService.getAll(profileId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a page of payees for a profile
-	private static PayeePage getPayeePage(UUID profileId, int pageNum, int pageSize) {
-		try {
-			return PayeeService.getPage(profileId, pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get a payee for a profile
-	private static Payee getPayee(UUID profileId, UUID payeeId) {
-		try {
-			return PayeeService.get(profileId, payeeId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a (GBP bank account) payee for a profile
-	private static Payee createBankAccountPayee(UUID profileId) {
-		try {
-			// Create an address (for the recipient)
-			Address address = new AddressBuilder().setLine1("3 Privet Drive").setLine2("Little Whinging")
-					.setLine3("Big Whinging").setCity("Muggle City").setLocality("Surrey")
-					.setPostcode("MC1 1AA").setCountry("GB").build();
-
-			// Create a recipient (for the payee data)
-			Recipient recipient = new RecipientBuilder().setFullName("Mr John Lucky")
-					.setEmail("johnlucky@money.com").setAddress(address).build();
-
-			// Create a payee account (for the payee data)
-			PayeeAccount payeeAccount = new PayeeAccountBuilder().setIban("SAPYGB2L40000031000001")
-					.setSortCode("040004").setAccountNumber("37618166").build();
-
-			// Create payee data (for the payee)
-			PayeeCreateData payeeCreateData = new PayeeDataBuilder()
-					.setRecipient(recipient).setPayeeAccount(payeeAccount).build();
-
-			// Create a payee
-			PayeeCreate payeeCreate = new PayeeBuilder().setTitle("NatWest").setPayeeType(PayeeType.bank_account)
-					.setCurrency(Currency.GBP).setPayeeCreateData(payeeCreateData).build();
-
-			return PayeeService.create(profileId, payeeCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Rename a payee (the payee ID is not returned)
-	private static Payee renamePayee(UUID profileId, UUID payeeId) {
-		try {
-			return PayeeService.rename(profileId, payeeId, "Royal Bank of Scotland");
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Delete a payee (should return status code 204)
-	private static int deletePayee(UUID profileId, UUID payeeId) {
-		try {
-			return PayeeService.delete(profileId, payeeId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return 500;
-		}
-	}
-
-
-	// Get open banking providers
-	private static PaymentOpenBankingProviderPage getOpenBankingProviders(Currency currency, String country) {
-		try {
-			return PaymentService.getOpenBankingProviders(currency, country);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+            // Delete the profiles
+            statusCode = deleteProfile(profile.getId());
+            LOGGER.info("Delete profile, ID: " + profile.getId() + ", status code: " + statusCode + "\n");
+
+            statusCode = deleteProfile(profile2.getId());
+            LOGGER.info("Delete profile, ID: " + profile2.getId() + ", status code: " + statusCode + "\n");
+
+        } catch (RuntimeException e) {
+            LOGGER.error("Exception: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * These methods call the API services. Use these examples in your code.
+     */
+
+    // Get the API status
+    private static Status getStatus() {
+        try {
+            return StatusService.get();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Create a profile
+    private static Profile createProfile(String email, String phoneNumber) {
+        try {
+            // Create an address (required fields: line1, city, locality, postcode)
+            Address address = new AddressBuilder().setLine1("Westminster Cathedral").setLine2("Victoria Street")
+                    .setLine3("Westminster").setCity("London").setLocality("Greater London").setPostcode("SW1P 1LT")
+                    .setCountry("GB").build();
+
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+            // Create a profile (required fields: type, firstName, lastName, email, phoneNumber, address)
+            Profile newProfile = new ProfileBuilder()
+                    .setType(ProfileType.personal).setTitle(Title.mr).setFirstName("James").setMiddleName("Paul")
+                    .setLastName("McCartney").setEmail(email).setPhoneNumber(phoneNumber)
+                    .setBirthDate("1942-06-18").setAddress(address).setGender(Gender.male).setMetadata(metadata).build();
+
+            return ProfileService.create(newProfile);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Force-verify a profile (doesn't check the country of birth, mother's maiden name, passport or driving licence)
+    private static VerificationResponse forceVerifyProfile(Profile profile) {
+        try {
+            return ProfileService.forceVerify(profile.getId());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Verify a profile (check the country of birth, mother's maiden name, passport or driving licence - will fail as this is dummy data)
+    private static VerificationResponse verifyProfile(Profile profile) {
+        try {
+            Passport passport = new PassportBuilder().setOriginCountry("GB")
+                    .setNumber("PD12345678IRL1234567M1234567<<<<<<<<<<<<<<<0").setExpiryDate("2031-09-23").build();
+            DriverLicence driverLicence = new DriverLicenceBuilder().setNumber("EUEGE123456BM9NM")
+                    .setPostcode("B126DY").setIssueDate("2011-10-27").build();
+            VerificationRequest verificationRequest = new VerificationRequestBuilder().setBirthCountry("IE")
+                    .setMotherMaidenName("Smithy").setPassport(passport).setDriverLicence(driverLicence).build();
+            return ProfileService.verify(profile.getId(), verificationRequest);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a profile
+    private static Profile getProfile(UUID id) {
+        try {
+            return ProfileService.get(id);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Update a profile
+    private static Profile updateProfile(Profile profile) {
+        try {
+            // Update a profile's address to Westminster Abbey
+            Address address = new AddressBuilder().setLine1("Westminster Abbey").setLine2("Victoria Street")
+                    .setLine3("Westminster").setCity("London").setLocality("Greater London").setPostcode("SW1P 1LT")
+                    .setCountry("GB").build();
+            profile.setAddress(address);
+            return ProfileService.update(profile);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get all profiles
+    private static ProfilePage getProfiles() {
+        try {
+            // Get all profiles
+            return ProfileService.getAll();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a page of profiles
+    private static ProfilePage getProfilePage(int pageNum, int pageSize) {
+        try {
+            // Get the first page of profiles, with 4 per page
+            return ProfileService.getPage(pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Delete a profile (should return status code 204)
+    private static int deleteProfile(UUID id) {
+        try {
+            return ProfileService.delete(id);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return 500;
+        }
+    }
+
+
+    // Get all wallets for a profile
+    private static WalletPage getWallets(UUID profileId) {
+        try {
+            return WalletService.getAll(profileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a page of wallets for a profile
+    private static WalletPage getWalletPage(UUID profileId, int pageNum, int pageSize) {
+        try {
+            return WalletService.getPage(profileId, pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get all schedules for a profile
+    private static SchedulePage getSchedules(UUID profileId) {
+        try {
+            return ScheduleService.getAll(profileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a page of schedules for a profile
+    private static SchedulePage getSchedulePage(UUID profileId, int pageNum, int pageSize) {
+        try {
+            return ScheduleService.getPage(profileId, pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a schedule for a profile
+    private static Schedule getSchedule(UUID profileId, UUID scheduleId) {
+        try {
+            return ScheduleService.get(profileId, scheduleId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Create a schedule for a profile
+    private static Schedule createSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+            // Append the datetime to the schedule to make it unique
+            Date date = new Date();
+            String today = new SimpleDateFormat("yyyy-MM-dd").format(date);
+            String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
+            String title = "Test Daily Schedule " + now;
+
+            ScheduleCreate scheduleCreate = new ScheduleBuilder().setTitle(title).setCurrency(Currency.GBP)
+                    .setSchedulePurpose(SchedulePurpose.pay).setSchedulePeriod(SchedulePeriod.daily).setNumberOfPayments(7)
+                    .setRegularPaymentStartDate(today).setRegularPaymentAmount(500).setDepositPaymentDate(today)
+                    .setDepositPaymentAmount(100).setDescription("7 day schedule paying £5 a day with a deposit of £1")
+                    .setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
+
+            return ScheduleService.create(profileId, scheduleCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Updates a schedule
+    private static Schedule updateSchedule(UUID profileId, Schedule schedule) {
+        try {
+            // Set the number of payments to 14 and change the title
+            String newTitle = "Updated " + schedule.getTitle();
+            ScheduleUpdate scheduleUpdate = new ScheduleUpdateBuilder().copySchedule(schedule).setNumberOfPayments(14)
+                    .setTitle(newTitle).setDescription("14 day schedule paying £5 a day with a deposit of £1").build();
+
+            return ScheduleService.update(profileId, schedule.getId(), scheduleUpdate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Create a direct debit to wallet schedule for a profile.
+    // The funding source must be of type direct debit and the payee must be of type wallet.
+    private static Schedule createDirectDebitToWalletSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+            // Append the datetime to the schedule to make it unique
+            Date date = new Date();
+            String today = new SimpleDateFormat("yyyy-MM-dd").format(date);
+            String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
+            String title = "Test Daily Direct Debit to Wallet Schedule " + now;
+
+            ScheduleDDToWalletCreate scheduleDDToWalletCreate = new ScheduleDDToWalletBuilder().setTitle(title)
+                    .setSchedulePurpose(SchedulePurpose.pay).setSchedulePeriod(SchedulePeriod.daily).setNumberOfPayments(7)
+                    .setRegularPaymentStartDate(today).setRegularPaymentAmount(500).setDepositPaymentDate(today)
+                    .setDepositPaymentAmount(100).setDescription("7 day DD to wallet schedule paying £5 a day with a deposit of £1")
+                    .setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
+
+            return ScheduleService.createDirectDebitToWallet(profileId, scheduleDDToWalletCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Pay overdue payments for a schedule
+    private static int payOverduePayments(UUID profileId, Schedule schedule) {
+        try {
+            return ScheduleService.payOverduePayments(profileId, schedule);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return 500;
+        }
+    }
+
+
+    // Cancel a schedule (should return status code 204)
+    private static int cancelSchedule(UUID profileId, UUID scheduleId) {
+        try {
+            return ScheduleService.cancel(profileId, scheduleId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return 500;
+        }
+    }
+
+
+    // Get the funding sources for a profile
+    private static FundingSourcePage getFundingSources(UUID profileId) {
+        try {
+            return FundingSourceService.getAll(profileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a page of funding sources for a profile
+    private static FundingSourcePage getFundingSourcePage(UUID profileId, int pageNum, int pageSize) {
+        try {
+            return FundingSourceService.getPage(profileId, pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Create a funding source for a profile
+    private static FundingSource createFundingSource(UUID profileId) {
+        try {
+            FundingSourcePayer fundingSourcePayer = new FundingSourcePayerBuilder().setFullName("Jack Smith").build();
+
+            FundingSourceAccount fundingSourceAccount =
+                    new FundingSourceAccountBuilder().setSortCode("040004").setAccountNumber("37618166").build();
+
+            FundingSourceCreateData fundingSourceCreateData = new FundingSourceDataBuilder()
+                    .setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourcePayer)
+                    .setFundingSourceAccount(fundingSourceAccount).build();
+
+            FundingSourceCreate fundingSourceCreate =
+                    new FundingSourceBuilder().setTitle("Direct Debit Source")
+                            .setCurrency(Currency.GBP).setFundingSourceType(FundingSourceType.direct_debit)
+                            .setFundingSourceCreateData(fundingSourceCreateData).build();
+
+            return FundingSourceService.create(profileId, fundingSourceCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Create a direct debit funding source for a profile
+    private static FundingSource createDirectDebitFundingSource(UUID profileId) {
+        try {
+            FundingSourcePayer fundingSourcePayer = new FundingSourcePayerBuilder().setFullName("Jack Smith").build();
+
+            FundingSourceAccount fundingSourceAccount =
+                    new FundingSourceAccountBuilder().setSortCode("040004").setAccountNumber("37618166").build();
+
+            FundingSourceCreateData fundingSourceCreateData = new FundingSourceDataBuilder()
+                    .setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourcePayer)
+                    .setFundingSourceAccount(fundingSourceAccount).build();
+
+            FundingSourceDDCreate fundingSourceDDCreate =
+                    new FundingSourceDDBuilder().setTitle("Direct Debit Source 2")
+                            .setCurrency(Currency.GBP).setFundingSourceCreateData(fundingSourceCreateData).build();
+
+            return FundingSourceService.createDirectDebit(profileId, fundingSourceDDCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a funding source
+    private static FundingSource getFundingSource(UUID profileId, UUID fundingSourceId) {
+        try {
+            return FundingSourceService.get(profileId, fundingSourceId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Rename a funding source
+    private static FundingSource renameFundingSource(UUID profileId, UUID fundingSourceId) {
+        try {
+            return FundingSourceService.rename(profileId, fundingSourceId, "Direct Debit Source Modified");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Delete a funding source (should return status code 204)
+    private static int deleteFundingSource(UUID profileId, UUID fundingSourceId) {
+        try {
+            return FundingSourceService.delete(profileId, fundingSourceId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return 500;
+        }
+    }
+
+
+    // Get all payees for a profile
+    private static PayeePage getPayees(UUID profileId) {
+        try {
+            return PayeeService.getAll(profileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a page of payees for a profile
+    private static PayeePage getPayeePage(UUID profileId, int pageNum, int pageSize) {
+        try {
+            return PayeeService.getPage(profileId, pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a payee for a profile
+    private static Payee getPayee(UUID profileId, UUID payeeId) {
+        try {
+            return PayeeService.get(profileId, payeeId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Create a (GBP bank account) payee for a profile
+    private static Payee createBankAccountPayee(UUID profileId) {
+        try {
+            // Create an address (for the recipient)
+            Address address = new AddressBuilder().setLine1("3 Privet Drive").setLine2("Little Whinging")
+                    .setLine3("Big Whinging").setCity("Muggle City").setLocality("Surrey")
+                    .setPostcode("MC1 1AA").setCountry("GB").build();
+
+            // Create a recipient (for the payee data)
+            Recipient recipient = new RecipientBuilder().setFullName("Mr John Lucky")
+                    .setEmail("johnlucky@money.com").setAddress(address).build();
+
+            // Create a payee account (for the payee data)
+            PayeeAccount payeeAccount = new PayeeAccountBuilder().setIban("SAPYGB2L40000031000001")
+                    .setSortCode("040004").setAccountNumber("37618166").build();
+
+            // Create payee data (for the payee)
+            PayeeCreateData payeeCreateData = new PayeeDataBuilder()
+                    .setRecipient(recipient).setPayeeAccount(payeeAccount).build();
+
+            // Create a payee
+            PayeeCreate payeeCreate = new PayeeBuilder().setTitle("NatWest").setPayeeType(PayeeType.bank_account)
+                    .setCurrency(Currency.GBP).setPayeeCreateData(payeeCreateData).build();
+
+            return PayeeService.create(profileId, payeeCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Rename a payee (the payee ID is not returned)
+    private static Payee renamePayee(UUID profileId, UUID payeeId) {
+        try {
+            return PayeeService.rename(profileId, payeeId, "Royal Bank of Scotland");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Delete a payee (should return status code 204)
+    private static int deletePayee(UUID profileId, UUID payeeId) {
+        try {
+            return PayeeService.delete(profileId, payeeId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return 500;
+        }
+    }
+
+
+    // Get open banking providers
+    private static PaymentOpenBankingProviderPage getOpenBankingProviders(Currency currency, String country) {
+        try {
+            return PaymentService.getOpenBankingProviders(currency, country);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
     // Create an open banking payment to a profile.
@@ -855,306 +863,306 @@ public class TestSDKApplication {
 
 
     // Create a Euro open banking payment to a profile (will fail as it's not using a real IBAN).
-	private static PaymentOpenBanking createEurOpenBankingPayment(UUID profileId) {
-		try {
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+    private static PaymentOpenBanking createEurOpenBankingPayment(UUID profileId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
 
-			PaymentOpenBankingEurCreate paymentOpenBankingEurCreate = new PaymentOpenBankingEurBuilder()
-					.setAmount(10000).setDescription("Deposit for Flat 1").setCountry("ES").setCurrency(Currency.EUR)
-					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
-					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("xs2a-redsys-banco-santander")
-					.setPayerIban("DE05202208000090025782").setPayerName("Paul McCartney")
-					.setBeneficiaryName("Tesco LTD").build();
+            PaymentOpenBankingEurCreate paymentOpenBankingEurCreate = new PaymentOpenBankingEurBuilder()
+                    .setAmount(10000).setDescription("Deposit for Flat 1").setCountry("ES").setCurrency(Currency.EUR)
+                    .setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
+                    .setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("xs2a-redsys-banco-santander")
+                    .setPayerIban("GB13ABBY09012706978360").setPayerName("Paul McCartney")
+                    .setBeneficiaryName("Tesco LTD").build();
 
-			return PaymentService.createOpenBankingEur(profileId, paymentOpenBankingEurCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a wallet to bank account payment from the profile to the payee
-	private static Payment createWalletToBankAccountPayment(UUID profileId, UUID payeeId) {
-		try {
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-			Date date = new Date();
-			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
-
-			PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
-					.setAmount(1000).setDescription("Payment to bank account").setExecutionDate(now)
-					.setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
-
-			return PaymentService.createWalletToBankAccount(profileId, paymentWalletToPayeeCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+            return PaymentService.createOpenBankingEur(profileId, paymentOpenBankingEurCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Create a wallet to wallet payment from the profile to the payee
-	private static Payment createWalletToWalletPayment(UUID profileId, UUID payeeId) {
-		try {
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+    // Create a wallet to bank account payment from the profile to the payee
+    private static Payment createWalletToBankAccountPayment(UUID profileId, UUID payeeId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
 
-			Date date = new Date();
-			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+            Date date = new Date();
+            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
-			PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
-					.setAmount(1000).setDescription("Payment to wallet").setExecutionDate(now)
-					.setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
+            PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
+                    .setAmount(1000).setDescription("Payment to bank account").setExecutionDate(now)
+                    .setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
 
-			return PaymentService.createWalletToWallet(profileId, paymentWalletToPayeeCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Create a single direct debit to wallet payment from the profile to the payee.
-	// The funding source must be of type direct debit and the payee must be of type wallet.
-	private static Payment createDirectDebitToWalletPayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
-		try {
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-			Date date = new Date();
-			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
-
-			PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate = new PaymentFundingSourceToPayeeBuilder()
-					.setAmount(1000).setDescription("Single Direct Debit to wallet").setExecutionDate(now)
-					.setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
-
-			return PaymentService.createDirectDebitToWallet(profileId, paymentFundingSourceToPayeeCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+            return PaymentService.createWalletToBankAccount(profileId, paymentWalletToPayeeCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
-	private static Payment createFundingSourceToPayeePayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
-		try {
-			// Create some metadata (optional)
-			JsonNode metadata = JsonHelper.createEmptyObjectNode();
-			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+    // Create a wallet to wallet payment from the profile to the payee
+    private static Payment createWalletToWalletPayment(UUID profileId, UUID payeeId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
 
-			Date date = new Date();
-			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+            Date date = new Date();
+            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
-			PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate = new PaymentFundingSourceToPayeeBuilder()
-					.setAmount(1000).setDescription("Payment from FS wallet to payee wallet").setExecutionDate(now)
-					.setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
+            PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
+                    .setAmount(1000).setDescription("Payment to wallet").setExecutionDate(now)
+                    .setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
 
-			return PaymentService.create(profileId, paymentFundingSourceToPayeeCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get all payments for a profile
-	private static PaymentPage getPayments(UUID profileId) {
-		try {
-			return PaymentService.getAll(profileId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-	// Get a page of payments for a profile
-	private static PaymentPage getPaymentPage(UUID profileId, int pageNum, int pageSize) {
-		try {
-			return PaymentService.getPage(profileId, pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+            return PaymentService.createWalletToWallet(profileId, paymentWalletToPayeeCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get a payment belonging to a profile
-	private static Payment getPayment(UUID profileId, UUID paymentId) {
-		try {
-			return PaymentService.get(profileId, paymentId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Create a single direct debit to wallet payment from the profile to the payee.
+    // The funding source must be of type direct debit and the payee must be of type wallet.
+    private static Payment createDirectDebitToWalletPayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+            Date date = new Date();
+            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+
+            PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate = new PaymentFundingSourceToPayeeBuilder()
+                    .setAmount(1000).setDescription("Single Direct Debit to wallet").setExecutionDate(now)
+                    .setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
+
+            return PaymentService.createDirectDebitToWallet(profileId, paymentFundingSourceToPayeeCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Creates a services payment which simulates an incoming bank payment (sandbox only).
-	// Returns the ID of the saxo_transferinstruction in the sandbox database.
-	private static SaxoTransferInstruction createServicePayment(UUID profileId, UUID payeeId) {
-		try {
-			PaymentServiceCreate paymentServiceCreate = new PaymentServiceBuilder().setAmount(5000)
-					.setDescription("Service Payment").setPaymentScenario(PaymentScenario.IncomingBankTransfer)
-					.setPayeeId(payeeId).build();
-			return PaymentService.createService(profileId, paymentServiceCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Create a wallet to wallet payment from the profile to the payee using the generic payments endpoint
+    private static Payment createFundingSourceToPayeePayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
+        try {
+            // Create some metadata (optional)
+            JsonNode metadata = JsonHelper.createEmptyObjectNode();
+            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+            Date date = new Date();
+            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+
+            PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate = new PaymentFundingSourceToPayeeBuilder()
+                    .setAmount(1000).setDescription("Payment from FS wallet to payee wallet").setExecutionDate(now)
+                    .setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
+
+            return PaymentService.create(profileId, paymentFundingSourceToPayeeCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get the list of non-processing dates (dates that banks cannot process payments as they are closed)
-	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate) {
-		try {
-			return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get all payments for a profile
+    private static PaymentPage getPayments(UUID profileId) {
+        try {
+            return PaymentService.getAll(profileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+    // Get a page of payments for a profile
+    private static PaymentPage getPaymentPage(UUID profileId, int pageNum, int pageSize) {
+        try {
+            return PaymentService.getPage(profileId, pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get the list of non-processing dates with a funding source ID and payee ID
-	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate, UUID fundingSourceId, UUID payeeId) {
-		try {
-			return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate, fundingSourceId, payeeId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get a payment belonging to a profile
+    private static Payment getPayment(UUID profileId, UUID paymentId) {
+        try {
+            return PaymentService.get(profileId, paymentId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get the list of non-processing dates with a funding source type and payee type
-	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate,
-															FundingSourceType fundingSourceType, PayeeType payeeType) {
-		try {
-			return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate, fundingSourceType, payeeType);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Creates a services payment which simulates an incoming bank payment (sandbox only).
+    // Returns the ID of the saxo_transferinstruction in the sandbox database.
+    private static SaxoTransferInstruction createServicePayment(UUID profileId, UUID payeeId) {
+        try {
+            PaymentServiceCreate paymentServiceCreate = new PaymentServiceBuilder().setAmount(5000)
+                    .setDescription("Service Payment").setPaymentScenario(PaymentScenario.IncomingBankTransfer)
+                    .setPayeeId(payeeId).build();
+            return PaymentService.createService(profileId, paymentServiceCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Delete a payment (should return status code 204)
-	private static int deletePayment(UUID profileId, UUID paymentId) {
-		try {
-			return PaymentService.delete(profileId, paymentId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return 500;
-		}
-	}
+    // Get the list of non-processing dates (dates that banks cannot process payments as they are closed)
+    private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate) {
+        try {
+            return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get all transactions for a profile
-	private static TransactionPage getTransactions(UUID profileId) {
-		try {
-			return TransactionService.getAll(profileId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get the list of non-processing dates with a funding source ID and payee ID
+    private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate, UUID fundingSourceId, UUID payeeId) {
+        try {
+            return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate, fundingSourceId, payeeId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get a page of transactions for a profile
-	private static TransactionPage getTransactionPage(UUID profileId, int pageNum, int pageSize) {
-		try {
-			return TransactionService.getPage(profileId, pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get the list of non-processing dates with a funding source type and payee type
+    private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate,
+                                                            FundingSourceType fundingSourceType, PayeeType payeeType) {
+        try {
+            return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate, fundingSourceType, payeeType);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get a transaction belonging to a profile
-	private static Transaction getTransaction(UUID profileId, UUID transactionId) {
-		try {
-			return TransactionService.get(profileId, transactionId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Delete a payment (should return status code 204)
+    private static int deletePayment(UUID profileId, UUID paymentId) {
+        try {
+            return PaymentService.delete(profileId, paymentId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return 500;
+        }
+    }
 
 
-	// Create a webhook
-	private static Webhook createWebhook(String callbackUrl) {
-		try {
-			WebhookCreate webhookCreate = new WebhookBuilder().setCallbackUrl(callbackUrl).build();
-			return WebhookService.create(webhookCreate);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get all transactions for a profile
+    private static TransactionPage getTransactions(UUID profileId) {
+        try {
+            return TransactionService.getAll(profileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get all webhooks
-	private static WebhookPage getWebhooks() {
-		try {
-			return WebhookService.getAll();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get a page of transactions for a profile
+    private static TransactionPage getTransactionPage(UUID profileId, int pageNum, int pageSize) {
+        try {
+            return TransactionService.getPage(profileId, pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get a page of webhooks
-	private static WebhookPage getWebhookPage(int pageNum, int pageSize) {
-		try {
-			return WebhookService.getPage(pageNum, pageSize);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get a transaction belonging to a profile
+    private static Transaction getTransaction(UUID profileId, UUID transactionId) {
+        try {
+            return TransactionService.get(profileId, transactionId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Get a webhook
-	private static Webhook getWebhook(UUID id) {
-		try {
-			return WebhookService.get(id);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Create a webhook
+    private static Webhook createWebhook(String callbackUrl) {
+        try {
+            WebhookCreate webhookCreate = new WebhookBuilder().setCallbackUrl(callbackUrl).build();
+            return WebhookService.create(webhookCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Update a webhook
-	private static Webhook updateWebhook(Webhook webhook) {
-		try {
-			return WebhookService.update(webhook);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
+    // Get all webhooks
+    private static WebhookPage getWebhooks() {
+        try {
+            return WebhookService.getAll();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
 
-	// Delete a webhook (should return status code 204)
-	private static int deleteWebhook(UUID id) {
-		try {
-			return WebhookService.delete(id);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return 500;
-		}
-	}
+    // Get a page of webhooks
+    private static WebhookPage getWebhookPage(int pageNum, int pageSize) {
+        try {
+            return WebhookService.getPage(pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a webhook
+    private static Webhook getWebhook(UUID id) {
+        try {
+            return WebhookService.get(id);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Update a webhook
+    private static Webhook updateWebhook(Webhook webhook) {
+        try {
+            return WebhookService.update(webhook);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Delete a webhook (should return status code 204)
+    private static int deleteWebhook(UUID id) {
+        try {
+            return WebhookService.delete(id);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return 500;
+        }
+    }
 
 
 }

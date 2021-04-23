@@ -26,7 +26,6 @@ public class PaymentOpenBankingEurBuilder {
     private JsonNode metadata;
     private String providerId;
     private OpenBankingSchemeId schemeId;
-    private OpenBankingFeeOptionId feeOptionId;
     private String payerIban;
     private String payerName;
     private String beneficiaryName;
@@ -131,17 +130,6 @@ public class PaymentOpenBankingEurBuilder {
     }
 
     /**
-     * Sets the fee option ID.
-     *
-     * @param feeOptionId  Fee option ID.
-     * @return PaymentOpenBankingEurBuilder  The updated payment open banking builder.
-     */
-    public PaymentOpenBankingEurBuilder setFeeOptionId(OpenBankingFeeOptionId feeOptionId) {
-        this.feeOptionId = feeOptionId;
-        return this;
-    }
-
-    /**
      * Sets the payer IBAN.
      *
      * @param payerIban  Payer IBAN.
@@ -181,8 +169,7 @@ public class PaymentOpenBankingEurBuilder {
      */
     public PaymentOpenBankingEurCreate build() {
         return new PaymentOpenBankingEurCreate(amount, description, country, currency, webhookUri, redirectUri,
-                                               metadata, providerId, schemeId, feeOptionId, payerIban,
-                                               payerName, beneficiaryName);
+                                               metadata, providerId, schemeId, payerIban, payerName, beneficiaryName);
     }
 
 }

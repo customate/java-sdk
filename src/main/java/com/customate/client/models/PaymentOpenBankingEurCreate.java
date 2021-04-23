@@ -72,15 +72,13 @@ public class PaymentOpenBankingEurCreate extends BaseModel {
      * @param metadata  Metadata.
      * @param providerId  Provider ID (the bank).
      * @param schemeId  Scheme ID.
-     * @param feeOptionId  Fee option ID.
      * @param payerIban  Payer IBAN.
      * @param payerName  Payer name.
      * @param beneficiaryName  Beneficiary name.
      */
     public PaymentOpenBankingEurCreate(long amount, String description, String country, Currency currency,
                                        String webhookUri, String redirectUri, JsonNode metadata, String providerId,
-                                       OpenBankingSchemeId schemeId, OpenBankingFeeOptionId feeOptionId,
-                                       String payerIban, String payerName, String beneficiaryName) {
+                                       OpenBankingSchemeId schemeId, String payerIban, String payerName, String beneficiaryName) {
         this.amount = amount;
         this.description = description;
         this.country = country;
@@ -90,7 +88,6 @@ public class PaymentOpenBankingEurCreate extends BaseModel {
         this.metadata = metadata;
         this.providerId = providerId;
         this.schemeId = schemeId;
-        this.feeOptionId = feeOptionId;
         this.payerIban = payerIban;
         this.payerName = payerName;
         this.beneficiaryName = beneficiaryName;
