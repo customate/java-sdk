@@ -1,5 +1,3 @@
-//package com.customate.example;
-
 import com.customate.client.builders.*;
 import com.customate.client.enums.*;
 import com.customate.client.models.*;
