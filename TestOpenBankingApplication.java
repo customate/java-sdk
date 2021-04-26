@@ -17,7 +17,7 @@ public class TestOpenBankingApplication {
 
 	// Tests all the endpoints
 	public static void main(String[] args) {
-		SpringApplication.run(TestOpenBankingApplication.class, args);
+		//SpringApplication.run(TestOpenBankingApplication.class, args);
 		try {
 			// Create a profile - emails and phone number must be unique in the database
 			Profile profile = createProfile("paulmccartney500@music.com", "+447773100500");
