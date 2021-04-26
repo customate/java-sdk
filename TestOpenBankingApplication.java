@@ -1,4 +1,4 @@
-package com.customate.example;
+//package com.customate.example;
 
 import com.customate.client.builders.*;
 import com.customate.client.enums.*;
@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.UUID;
-
 
 @SpringBootApplication
 public class TestOpenBankingApplication {
