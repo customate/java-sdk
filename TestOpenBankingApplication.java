@@ -33,6 +33,13 @@ public class TestOpenBankingApplication {
 							.getUri();
 			LOGGER.info(uri);
 
+			// Write the URI to the file system
+			Path path = Paths.get("uri.txt");
+			Files.deleteIfExists(path);
+
+			Path fileName = Path.of("uri.txt");
+			Files.writeString(fileName, uri);
+
 			// Delete the profile
 			int statusCode = deleteProfile(profile.getId());
 
