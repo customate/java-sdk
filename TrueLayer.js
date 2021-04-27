@@ -9,6 +9,12 @@ const playwright = require('playwright');
 const uri = process.argv.slice(3)[0];
 console.log("uri: " + uri);
 
+const fs = require('fs');
+fs.writeFile('uri-arg.txt', uri, (err) => {
+    if (err) throw err;
+    console.log('URI arg written to uri-arg.txt');
+});
+
 (async () => {
   try {
     for (const browserType of ['chromium']) {
