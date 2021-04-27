@@ -35,7 +35,7 @@ public class TestOpenBankingApplication {
 							.getPaymentOpenBankingDataAttributes()
 							.getPaymentOpenBankingDataAttributesMetadata()
 							.getUri();
-			LOGGER.info(uri);
+			//LOGGER.info(uri);
 
 			// Write the URI to the file system
 			Path path = Paths.get("uri.txt");
@@ -102,7 +102,7 @@ public class TestOpenBankingApplication {
 			PaymentOpenBankingGbpCreate paymentOpenBankingGbpCreate = new PaymentOpenBankingGbpBuilder()
 					.setAmount(10000).setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
 					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
-					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("ob-sandbox-natwest")
+					.setRedirectUri("https://gocustomate.com/").setMetadata(metadata).setProviderId("ob-sandbox-natwest")
 					.setPayerName("Paul McCartney").setBeneficiaryName("Tesco LTD").build();
 
 			return PaymentService.createOpenBankingGbp(profileId, paymentOpenBankingGbpCreate);

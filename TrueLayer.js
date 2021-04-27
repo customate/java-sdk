@@ -7,12 +7,9 @@
 const playwright = require('playwright');
 
 const uri = process.argv.slice(3)[0];
-console.log("uri: " + uri);
-
-const fs = require('fs');
-fs.writeFile('uri-arg.txt', uri, (err) => {
-    if (err) throw err;
-    console.log('URI arg written to uri-arg.txt');
+fs = require('fs');
+fs.writeFile('uri-arg.txt', uri, function (err) {
+  if (err) return console.log(err);
 });
 
 (async () => {
@@ -65,7 +62,7 @@ fs.writeFile('uri-arg.txt', uri, (err) => {
       }
 
       // Check the redirect to Customate's homepage
-      await page.waitForSelector('#logo');
+      //await page.waitForSelector('#logo');
       await page.screenshot({ path: `redirect.png` });
 
       // Close the browser
