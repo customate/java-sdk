@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.UUID;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @SpringBootApplication
 public class TestOpenBankingApplication {
@@ -44,6 +47,8 @@ public class TestOpenBankingApplication {
 			int statusCode = deleteProfile(profile.getId());
 
 		} catch (RuntimeException e) {
+			LOGGER.error("Exception: " + e.getMessage());
+		} catch (IOException e) {
 			LOGGER.error("Exception: " + e.getMessage());
 		}
 	}
