@@ -6,6 +6,9 @@
 
 const playwright = require('playwright');
 
+const uri = process.argv.slice(3)[0];
+console.log("uri: " + uri);
+
 (async () => {
   try {
     for (const browserType of ['chromium']) {
