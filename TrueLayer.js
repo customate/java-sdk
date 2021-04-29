@@ -4,9 +4,11 @@
 // Call this script with the uri in double quotes and either confirm or cancel as the third argument,
 // i.e.   node .\TrueLayer.js confirm "<URI>"   or   node .\TrueLayer.js cancel "<URI>"
 
+const uri = process.argv.slice(3)[0];
+console.log('uri passed to JS file: ' + uri);
+
 const playwright = require('playwright');
 
-const uri = process.argv.slice(3)[0];
 fs = require('fs');
 fs.writeFile('uri-arg.txt', uri, function (err) {
   if (err) return console.log(err);
