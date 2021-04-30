@@ -6,22 +6,28 @@ import com.customate.client.utils.JsonHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.UUID;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@SpringBootApplication
+/**
+ * This class is for auto testing open banking using Microsoft Playwright.
+ * The Jenkins job runs this, which writes the Natwest URI to the filesystem.
+ * The test script reads the URI and performs a test.
+ *
+ * Date: 26-Apr-21
+ * Time: 1:46 PM
+ *
+ * @author Sav Balac
+ * @version 1.0
+ */
 public class TestOpenBankingApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestOpenBankingApplication.class);
 
-	// Tests all the endpoints
 	public static void main(String[] args) {
-		//SpringApplication.run(TestOpenBankingApplication.class, args);
 		try {
 			// Create a profile - emails and phone number must be unique in the database
 			Profile profile = createProfile("paulmccartney500@music.com", "+447773100500");
@@ -35,9 +41,8 @@ public class TestOpenBankingApplication {
 							.getPaymentOpenBankingDataAttributes()
 							.getPaymentOpenBankingDataAttributesMetadata()
 							.getUri();
-			//LOGGER.info(uri);
 
-			// Write the URI to the file system
+			// Write the URI to the file system (delete the file if it exists first)
 			Path path = Paths.get("uri.txt");
 			Files.deleteIfExists(path);
 
@@ -92,7 +97,7 @@ public class TestOpenBankingApplication {
 	}
 
 
-	// Create an open banking payment to a profile.
+	// Create an open banking payment to a profile
 	private static PaymentOpenBanking createGbpOpenBankingPayment(UUID profileId) {
 		try {
 			// Create some metadata (optional)

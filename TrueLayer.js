@@ -4,31 +4,21 @@
 // Call this script with the uri in double quotes and either confirm or cancel as the third argument,
 // i.e.   node .\TrueLayer.js confirm "<URI>"   or   node .\TrueLayer.js cancel "<URI>"
 
-const uri = process.argv.slice(3)[0];
-console.log('uri passed to JS file: ' + uri);
-
 const playwright = require('playwright');
-
-fs = require('fs');
-fs.writeFile('uri-arg.txt', uri, function (err) {
-  if (err) return console.log(err);
-});
+const uri = process.argv.slice(3)[0];
+console.log("uri: " + uri);
 
 (async () => {
   try {
     for (const browserType of ['chromium']) {
       // Start the browser
       const browser = await playwright[browserType].launch();
-      //const browser = await playwright[browserType].launch({headless: false}); // Un-comment to see it in action
+      //const browser = await playwright[browserType].launch({headless: false}); // Un-comment to see the browser
       const context = await browser.newContext();
 
-      // Go to TrueLayer's bank selection page using the URI supplied as an argument
+      // Go to Natwest's sandbox page using the URI supplied as an argument
       const page = await context.newPage();
-      await page.goto(process.argv.slice(3)[0]);
-
-      // Click on the only provider, NatWest - comment out for v2 of TrueLayer
-      //await page.waitForSelector('.tla-provider-logo');
-      //await page.$eval('.tla-provider-logo', e => e.click());
+      await page.goto(uri);
 
       // Enter the customer number and continue
       await page.waitForSelector('#customer-number');
@@ -64,7 +54,7 @@ fs.writeFile('uri-arg.txt', uri, function (err) {
       }
 
       // Check the redirect to Customate's homepage
-      //await page.waitForSelector('#logo');
+      await page.waitForSelector('#logo');
       await page.screenshot({ path: `redirect.png` });
 
       // Close the browser
