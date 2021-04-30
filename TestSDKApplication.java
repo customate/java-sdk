@@ -160,7 +160,7 @@ public class TestSDKApplication {
 			if (paymentOpenBankingEur != null) {
 				LOGGER.info("EUR open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingEur.asJson() + "\n");
 			} else {
-				LOGGER.info("EUR Open banking to wallet payment failed (invalid IBAN) for profile, ID: " + profile.getId() + "\n");
+				LOGGER.info("(Should fail) EUR Open banking to wallet payment failed (invalid IBAN) for profile, ID: " + profile.getId() + "\n");
 			}
 
 			// Create a GBP wallet to bank account payment from profile 1 to profile 2
