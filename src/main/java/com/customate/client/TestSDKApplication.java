@@ -45,7 +45,7 @@ public class TestSDKApplication {
             LOGGER.info("API Status\n" + status.asJson() + "\n");
 
             // Create a profile - emails and phone number must be unique in the database
-            Profile profile = createProfile("johnlennon514@music.com", "+447773200514");
+            Profile profile = createProfile("johnlennon515@music.com", "+447773200515");
             LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
             // Force-verify the profile
@@ -57,7 +57,7 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney386@music.com", "+447773200386");
+			Profile profile2 = createProfile("paulmccartney387@music.com", "+447773200387");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
