@@ -23,7 +23,7 @@ import java.util.UUID;
  * Paste the URI into a browser, enter customer no. 123456789012, PIN 572, password 436 and confirm the payment.
  * You have 3 minutes to do this (configurable below). The other payments rely on funds being available.
  *
- * Date: 08-Mar-21
+ * Date: 03-Jun-21
  * Time: 1:46 PM
  *
  * @author Sav Balac
