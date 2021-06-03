@@ -29,14 +29,14 @@ import java.util.UUID;
  * @author Sav Balac
  * @version 1.0
  */
-@SpringBootApplication
+//@SpringBootApplication
 public class TestSDKApplication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
 
     // Tests all the endpoints
     public static void main(String[] args) {
-        SpringApplication.run(TestSDKApplication.class, args);
+        //SpringApplication.run(TestSDKApplication.class, args);
         try {
             LOGGER.info("\n");
 
@@ -45,13 +45,13 @@ public class TestSDKApplication {
             LOGGER.info("API Status\n" + status.asJson() + "\n");
 
             // Create a profile - emails and phone number must be unique in the database
-            Profile profile = createProfile("johnlennon515@music.com", "+447773200515");
+            Profile profile = createProfile("johnlennon516@music.com", "+447773200516");
             LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
             // Force-verify the profile
             VerificationResponse verificationResponse = forceVerifyProfile(profile);
             LOGGER.info("Force-verify of profile\n" + verificationResponse.asJson() + "\n");
-
+            /*
 			// Get the newly-created profile
 			Profile verifiedProfile = getProfile(profile.getId());
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
@@ -109,12 +109,12 @@ public class TestSDKApplication {
 			// Get the funding sources for the profile
 			FundingSourcePage fundingSources = getFundingSources(profile.getId());
 			LOGGER.info("Funding sources for profile, ID: " + profile.getId() + "\n" + fundingSources.asJson() + "\n");
-
+            */
 			// Get a page of funding sources
 			FundingSourcePage fundingSourcePage = getFundingSourcePage(profile.getId(), 1, 1);
 			LOGGER.info("Page 1 with 1 funding source per page for profile, ID: " + profile.getId() + "\n" +
 					fundingSourcePage.asJson() + "\n");
-
+            /*
 			// Create a GBP bank account payee for profile 2
 			Payee bankAccountPayeeProfile2 = createBankAccountPayee(profile.getId());
 			LOGGER.info("Create bank account payee for profile 2, ID: " + profile2.getId() + "\n" +
@@ -346,13 +346,13 @@ public class TestSDKApplication {
 			statusCode = deletePayee(profile.getId(), bankAccountPayeeProfile2.getId());
 			LOGGER.info("Delete payee, ID: " + bankAccountPayeeProfile2.getId() + " from profile, ID: " +
 					profile.getId() + ", status code: " + statusCode + "\n");
-
+            */
             // Delete the profiles
-            statusCode = deleteProfile(profile.getId());
+            int statusCode = deleteProfile(profile.getId());
             LOGGER.info("Delete profile, ID: " + profile.getId() + ", status code: " + statusCode + "\n");
 
-            statusCode = deleteProfile(profile2.getId());
-            LOGGER.info("Delete profile, ID: " + profile2.getId() + ", status code: " + statusCode + "\n");
+            //statusCode = deleteProfile(profile2.getId());
+            //LOGGER.info("Delete profile, ID: " + profile2.getId() + ", status code: " + statusCode + "\n");
 
         } catch (RuntimeException e) {
             LOGGER.error("Exception: " + e.getMessage());
