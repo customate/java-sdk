@@ -1,0 +1,14 @@
+customate.baseUrl=https://dev-api.gocustomate.com
+customate.version=v1
+customate.apiKey=893cd25e-b5e9-4cec-aee0-e76edd698d9b
+customate.apiSecret=295396fe350d478fa62e82db0c4ec1048c5c965c8c5f291057
+
+#customate.baseUrl=https://stage-api.gocustomate.com
+#customate.version=v1
+#customate.apiKey=17cdb6f9-0f72-4947-9839-4a2b9a1686bc
+#customate.apiSecret=485921a7dda870bc6848f4dfda351b7b44ef3a446e3d47bbd7
+
+#customate.baseUrl=http://127.0.0.1:9000
+#customate.version=v1
+#customate.apiKey=597e936c-6abe-492a-a6f1-119446463d32
+#customate.apiSecret=ed2f6e2d4ef2fe8903ce517f5a5ef20e3a89a9f7d0ca7b7b6a
