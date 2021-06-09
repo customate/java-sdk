@@ -1,4 +1,4 @@
-package com.customate.example;
+package com.customate.client;
 
 import com.customate.client.builders.*;
 import com.customate.client.enums.*;
