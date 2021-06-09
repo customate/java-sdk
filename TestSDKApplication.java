@@ -27,14 +27,12 @@ import java.util.UUID;
  * @author Sav Balac
  * @version 1.0
  */
-//@SpringBootApplication
 public class TestSDKApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
 
 	// Tests some of the endpoints
 	public static void main(String[] args) {
-		SpringApplication.run(TestOpenBankingApplication.class, args);
 		try {
 			// Get the API status
 			Status status = getStatus();

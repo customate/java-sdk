@@ -13,13 +13,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.UUID;
 
 @SpringBootApplication
-public class TestOpenBankingApplication {
+public class TestSDKApplication {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestOpenBankingApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
 
     // Tests some of the endpoints
     public static void main(String[] args) {
-        SpringApplication.run(TestOpenBankingApplication.class, args);
         try {
             // Get the API status
             Status status = getStatus();
