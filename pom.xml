@@ -15,6 +15,7 @@
 	<description>Client library for using the Customate API</description>
 	<properties>
 		<java.version>11</java.version>
+		<start-class>com.customate.client.TestAPIApplication</start-class>
 	</properties>
 	<dependencies>
 		<dependency>
