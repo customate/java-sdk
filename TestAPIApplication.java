@@ -26,12 +26,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @version 1.0
  */
 @SpringBootApplication
-public class TestSDKApplication {
+public class TestAPIApplication {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestAPIApplication.class);
 
 	public static void main(String[] args) {
-		SpringApplication.run(TestSDKApplication.class, args);
+		SpringApplication.run(TestAPIApplication.class, args);
 
 		try {
 			LOGGER.info("\n");
