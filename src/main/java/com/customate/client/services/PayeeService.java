@@ -2,10 +2,7 @@ package com.customate.client.services;
 
 import com.customate.client.CustomateClient;
 import com.customate.client.exceptions.ApiException;
-import com.customate.client.models.Payee;
-import com.customate.client.models.PayeeCreate;
-import com.customate.client.models.PayeePage;
-import com.customate.client.models.TitleName;
+import com.customate.client.models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -95,20 +92,39 @@ public class PayeeService {
     }
 
     /**
-     * Renames a payee.
+     * Updates a payee.
      *
      * @param profileId  Profile ID.
      * @param payeeId  Payee ID.
-     * @param name  New payee name (title).
+     * @param payeeUpdate  The payee to update.
      * @return Payee  The payee.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
      * @throws InterruptedException  If there was an interrupted exception sending the request.
      * @throws ApiException  If the API returned errors.
      */
-    public static Payee rename(UUID profileId, UUID payeeId, String name) throws URISyntaxException, IOException, InterruptedException, ApiException {
-        TitleName payeeTitle = new TitleName(name);
-        HttpResponse<String> response = CustomateClient.put("profiles/" + profileId + "/payees/" + payeeId, payeeTitle.asJson());
+    public static Payee update(UUID profileId, UUID payeeId, PayeeUpdate payeeUpdate) throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.put("profiles/" + profileId + "/payees/" + payeeId, payeeUpdate.asJson());
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, Payee.class);
+    }
+
+    /**
+     * Validates a payee.
+     *
+     * @param profileId  Profile ID.
+     * @param payeeId  Payee ID.
+     * @param payeeValidate  The payee to validate.
+     * @return Payee  The payee.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static Payee validate(UUID profileId, UUID payeeId, PayeeValidate payeeValidate) throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.put("profiles/" + profileId + "/payees/" + payeeId + "/validate_bank_owner",
+                payeeValidate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, Payee.class);

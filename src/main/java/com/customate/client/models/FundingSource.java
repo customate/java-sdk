@@ -42,6 +42,8 @@ public class FundingSource extends BaseModel {
     private String creationDateTime;
     @JsonProperty("validation")
     private FundingSourceValidation fundingSourceValidation;
+    @JsonProperty("payer")
+    private FundingSourceUpdatePayer fundingSourceUpdatePayer;
 
     /**
      * Default constructor.

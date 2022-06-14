@@ -40,6 +40,8 @@ public class Payee extends BaseModel {
     private JsonNode metadata;
     @JsonProperty("creation_datetime")
     private String creationDateTime;
+    @JsonProperty("recipient")
+    private PayeeUpdateRecipient payeeUpdateRecipient;
 
     /**
      * Default constructor.

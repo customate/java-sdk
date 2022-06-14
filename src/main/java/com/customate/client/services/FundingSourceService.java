@@ -118,22 +118,43 @@ public class FundingSourceService {
     }
 
     /**
-     * Renames a funding source.
+     * Updates a funding source.
      *
      * @param profileId  Profile ID.
      * @param fundingSourceId  Funding source ID.
-     * @param name  New funding source name (title).
+     * @param fundingSourceUpdate  The funding source to update.
      * @return Funding Source  The funding source.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
      * @throws InterruptedException  If there was an interrupted exception sending the request.
      * @throws ApiException  If the API returned errors.
      */
-    public static FundingSource rename(UUID profileId, UUID fundingSourceId, String name)
+    public static FundingSource update(UUID profileId, UUID fundingSourceId, FundingSourceUpdate fundingSourceUpdate)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
-        TitleName fundingSourceTitle = new TitleName(name);
         HttpResponse<String> response =
-                CustomateClient.put("profiles/" + profileId + "/funding_sources/" + fundingSourceId, fundingSourceTitle.asJson());
+                CustomateClient.put("profiles/" + profileId + "/funding_sources/" + fundingSourceId, fundingSourceUpdate.asJson());
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, FundingSource.class);
+    }
+
+    /**
+     * Validates a funding source.
+     *
+     * @param profileId  Profile ID.
+     * @param fundingSourceId  Funding source ID.
+     * @param fundingSourceValidate  The funding source to validate.
+     * @return Funding Source  The funding source.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static FundingSource validate(UUID profileId, UUID fundingSourceId, FundingSourceValidate fundingSourceValidate)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response =
+                CustomateClient.put("profiles/" + profileId + "/funding_sources/" + fundingSourceId + "/validate_bank_owner",
+                        fundingSourceValidate.asJson());
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, FundingSource.class);
