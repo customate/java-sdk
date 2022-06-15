@@ -28,7 +28,7 @@ import java.util.UUID;
  * Time: 1:46 PM
  *
  * @author Sav Balac
- * @version 1.1
+ * @version 1.2
  */
 @SpringBootApplication
 public class TestSDKApplication {
