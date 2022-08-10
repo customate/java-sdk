@@ -11,7 +11,8 @@ package com.customate.client.enums;
  */
 public enum Currency {
     GBP("GBP"),
-    EUR("EUR");
+    EUR("EUR"),
+    USD("USD");
     
     private String currency;
 

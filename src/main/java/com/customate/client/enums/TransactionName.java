@@ -36,7 +36,12 @@ public enum TransactionName {
     MoneyOutBtFeeAndTax("MoneyOutBtFeeAndTax"),
     OpenBankingToWallet("OpenBankingToWallet"),
     MoneyInObFeeAndTax("MoneyInObFeeAndTax"),
-    External("External");
+    External("External"),
+    CurrencyExchangeFeeAndTax("CurrencyExchangeFeeAndTax"),
+    OutgoingExchangeFromInitiator("OutgoingExchangeFromInitiator"), // Initiator sells currency A
+    IncomingExchangeToCounterparty("IncomingExchangeToCounterparty"), // Counterparty receives currency A
+    OutgoingExchangeFromCounterparty("OutgoingExchangeFromCounterparty"), // Counterparty sells currency B
+    IncomingExchangeToInitiator("IncomingExchangeToInitiator"); // Initiator receives currency B
 
     private String transactionName;
 

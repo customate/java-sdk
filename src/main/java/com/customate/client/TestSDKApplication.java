@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
@@ -46,7 +47,7 @@ public class TestSDKApplication {
             LOGGER.info("API Status\n" + status.asJson() + "\n");
 
             // Create a profile - emails and phone number must be unique in the database
-            Profile profile = createProfile("johnlennon520537@music.com", "+447773200537");
+            Profile profile = createProfile("johnlennon520566@music.com", "+447773200566");
             LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
             // Force-verify the profile
@@ -58,12 +59,12 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney405@music.com", "+447773200405");
+			Profile profile2 = createProfile("paulmccartney433@music.com", "+447773200433");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
-			VerificationResponse verificationResponse2 = verifyProfile(profile2);
-			LOGGER.info("Verify profile 2\n" + verificationResponse2.asJson() + "\n");
+			//VerificationResponse verificationResponse2 = verifyProfile(profile2);
+			//LOGGER.info("Verify profile 2\n" + verificationResponse2.asJson() + "\n");
 
 			// Force-verify the second profile
 			VerificationResponse verificationResponse3 = forceVerifyProfile(profile2);
@@ -155,28 +156,33 @@ public class TestSDKApplication {
 			// Create a GBP open banking payment to load funds into the profile
 			PaymentOpenBanking paymentOpenBankingGbp = createGbpOpenBankingPayment(profile.getId());
 			LOGGER.info("GBP open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingGbp.asJson() + "\n");
-			LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 1 MINUTE!\n");
+			LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
 
-			// To complete the open banking payment, user intervention is required, i.e. paste the auth_uri into a browser.
+            // Create a GBP open banking payment to load funds into profile 2
+            PaymentOpenBanking paymentOpenBankingGbp2 = createGbpOpenBankingPayment(profile2.getId());
+            LOGGER.info("GBP open banking to wallet payment for profile, ID: " + profile2.getId() + "\n" + paymentOpenBankingGbp2.asJson() + "\n");
+            LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
+
+			// To complete the open banking payments, user intervention is required, i.e. paste the auth_uri into a browser.
 			// The following payments expect profile 1 to have funds in their GBP wallet.
-			// Only the live system transfers real funds.  YOU HAVE 1 MINUTE TO CONFIRM THE PAYMENT!
+			// Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE PAYMENT!
 			try {
-				Thread.sleep(60000); // 60 seconds
+				Thread.sleep(180000); // 180 seconds
 			} catch (InterruptedException e) {
 				LOGGER.error("InterruptedException: " + e.getMessage());
 			}
 
             // Create an EUR open banking payment to load funds into the profile (will fail as the IBAN is not real)
-            PaymentOpenBanking paymentOpenBankingEur = createEurOpenBankingPayment(profile.getId());
-			if (paymentOpenBankingEur != null) {
-                LOGGER.info("EUR open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingEur.asJson() + "\n");
-            } else {
-                LOGGER.info("EUR Open banking to wallet payment failed (invalid IBAN) for profile, ID: " + profile.getId() + "\n");
-            }
+            //PaymentOpenBanking paymentOpenBankingEur = createEurOpenBankingPayment(profile.getId());
+			//if (paymentOpenBankingEur != null) {
+            //    LOGGER.info("EUR open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingEur.asJson() + "\n");
+            //} else {
+            //    LOGGER.info("EUR Open banking to wallet payment failed (invalid IBAN) for profile, ID: " + profile.getId() + "\n");
+            //}
 
-			// Create a GBP wallet to bank account payment for profile 2
+			// Create a GBP wallet to bank account payment for profile 1
 			Payment walletToBankAccountPayment = createWalletToBankAccountPayment(profile2.getId(), bankAccountPayeeProfile2.getId());
-			LOGGER.info("Wallet to bank account payment from profile, ID: " + profile2.getId() + "\n" + walletToBankAccountPayment.asJson() + "\n");
+			LOGGER.info("Wallet to bank account payment from profile, ID: " + profile.getId() + "\n" + walletToBankAccountPayment.asJson() + "\n");
 
 			// Get the payee ID of profile 2 so that profile 1 can do a wallet to wallet payment
 			UUID gbpPayeeIdProfile2 = null;
@@ -255,24 +261,46 @@ public class TestSDKApplication {
 			// Get the list of non-processing dates, specifying the direct debit funding source type and bank account payee type.
 			// It takes 7 days to process a DD payment, so there are 7 dates.
 			NonProcessingDates nonProcessingDatesType = getNonProcessingDates(today, nextWeek, FundingSourceType.direct_debit, PayeeType.bank_account);
-			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source type and bank account payee type\n" +
+            LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source type and bank account payee type\n" +
 					nonProcessingDatesType.asJson() + "\n");
 
 			// Get all transactions for the profile
-			TransactionPage transactions = getTransactions(profile.getId());
-			LOGGER.info("Transactions for profile, ID: " + profile.getId() + "\n" + transactions.asJson() + "\n");
+			//TransactionPage transactions = getTransactions(profile.getId());
+			//LOGGER.info("Transactions for profile, ID: " + profile.getId() + "\n" + transactions.asJson() + "\n");
 
 			// Get a page of transactions
 			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 3);
 			LOGGER.info("Page 1 with 3 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
 
 			// Get a transaction
-            if (transactions.getItems().size() > 0) {
-                Transaction transaction = transactions.getItems().get(0);
+            if (transactionPage.getItems().size() > 0) {
+                Transaction transaction = transactionPage.getItems().get(0);
                 LOGGER.info("Transaction for profile, ID: " + profile.getId() + "\n" + transaction.asJson() + "\n");
             }
 
-			// Create a schedule, paying profile 2
+            // Create a P2P currency exchange
+            // Hard-coded EUR payee ID that has funds in localhost: 3d7b7bde-261d-49a3-a9cf-579beb20fd63
+            UUID eurCounterpartyPayeeId = UUID.fromString("3d7b7bde-261d-49a3-a9cf-579beb20fd63");
+            P2PCurrencyExchange p2pCurrencyExchange = createP2PCurrencyExchange(profile.getId(), gbpFundingSourceId, eurCounterpartyPayeeId);
+            LOGGER.info("P2P currency exchange, 30p for 3 Euro cents\n" + p2pCurrencyExchange.asJson() + "\n");
+
+            // Get the list of currency exchanges
+            P2PCurrencyExchangePage p2pCurrencyExchanges = getP2PCurrencyExchanges(profile.getId());
+            LOGGER.info("P2P currency exchanges for profile, ID: " + profile.getId() + "\n" + p2pCurrencyExchanges.asJson() + "\n");
+
+            // Get a page of currency exchanges
+            P2PCurrencyExchangePage p2pCurrencyExchangePage = getP2PCurrencyExchangePage(profile.getId(), 1, 3);
+            LOGGER.info("Page 1 with 3 P2P currency exchanges for profile, ID: " + profile.getId() + "\n" + p2pCurrencyExchangePage.asJson() + "\n");
+
+            // Get the latest currency exchange
+            int size = p2pCurrencyExchangePage.getItems().size();
+            if (size > 0) {
+                UUID currencyExchangeId = p2pCurrencyExchangePage.getItems().get(size-1).getId();
+                P2PCurrencyExchange latestP2PCurrencyExchange = getP2PCurrencyExchange(profile.getId(), currencyExchangeId);
+                LOGGER.info("Currency exchange for profile, ID: " + profile.getId() + "\n" + latestP2PCurrencyExchange.asJson() + "\n");
+            }
+
+            // Create a schedule, paying profile 2
 			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
 			LOGGER.info("7 day schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule.asJson() + "\n");
 
@@ -302,15 +330,15 @@ public class TestSDKApplication {
 			LOGGER.info("Another schedule, 7 days, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule3.asJson() + "\n");
 
 			// Pay overdue payments - will fail as there won't be any overdue payments (the schedule has just been created)
-			int statusCode = payOverduePayments(profile.getId(), schedule);
-			LOGGER.info("(Should fail) Overdue payments paid for schedule, ID: " + schedule.getId() + ", status code: " + statusCode + "\n");
+			//int statusCode = payOverduePayments(profile.getId(), schedule);
+			//LOGGER.info("(Should fail) Overdue payments paid for schedule, ID: " + schedule.getId() + ", status code: " + statusCode + "\n");
 
-			// Check the balance of GBP wallet for profile 1
+			// Get the balance of GBP wallet for profile 1
 			FundingSource fs = getFundingSource(profile.getId(), gbpFundingSourceId);
-			LOGGER.info("(Balance should be 7600) GBP funding source for profile, ID: " + fs.asJson() + "\n");
+			LOGGER.info("GBP funding source for profile, ID: " + fs.asJson() + "\n");
 
 			// Cancel the first schedule
-			statusCode = cancelSchedule(profile.getId(), schedule.getId());
+			int statusCode = cancelSchedule(profile.getId(), schedule.getId());
 			LOGGER.info("Cancel schedule, ID: " + schedule.getId() + ", status code: " + statusCode + "\n");
 
 			// Cancel the second schedule
@@ -339,10 +367,8 @@ public class TestSDKApplication {
 			LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
 
 			// Delete the webhook
-			statusCode = deleteWebhook(UUID.fromString("17ef373f-aff6-4a6d-99e5-98190f1b699e"));
+			statusCode = deleteWebhook(webhookPage.getItems().get(0).getId());
 			LOGGER.info("Delete webhook, ID: 17ef373f-aff6-4a6d-99e5-98190f1b699e, status code: " + statusCode + "\n");
-			statusCode = deleteWebhook(UUID.fromString("db98c945-b56e-4bfb-ba9b-dfe578936cdc"));
-            LOGGER.info("Delete webhook, ID: db98c945-b56e-4bfb-ba9b-dfe578936cdc, status code: " + statusCode + "\n");
 
 			// Delete the wallet to wallet payment (should fail as it's processing or complete)
 			statusCode = deletePayment(profile.getId(), walletToWalletPayment.getId());
@@ -355,7 +381,7 @@ public class TestSDKApplication {
 
 			// Delete the funding source
 			statusCode = deleteFundingSource(profile.getId(), fundingSource.getId());
-			LOGGER.info("(Should fail) Delete funding source, ID: " + fundingSource.getId() + " from profile, ID: " +
+			LOGGER.info("Delete funding source, ID: " + fundingSource.getId() + " from profile, ID: " +
 					profile.getId() + ", status code: " + statusCode + "\n");
 
 			// Delete the payee
@@ -969,7 +995,7 @@ public class TestSDKApplication {
             JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
 
             PaymentOpenBankingGbpCreate paymentOpenBankingGbpCreate = new PaymentOpenBankingGbpBuilder()
-                    .setAmount(10000000).setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
+                    .setAmount(10000).setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
                     .setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
                     .setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("mock-payments-gb-redirect")
                     .setPayerName("Paul McCartney").setBeneficiaryName("Tesco LTD").build();
@@ -1037,7 +1063,7 @@ public class TestSDKApplication {
             String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
             PaymentWalletToPayeeCreate paymentWalletToPayeeCreate = new PaymentWalletToPayeeBuilder()
-                    .setAmount(1).setDescription("Payment to wallet").setExecutionDate(now)
+                    .setAmount(100).setDescription("Payment to wallet").setExecutionDate(now)
                     .setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
 
             return PaymentService.createWalletToWallet(profileId, paymentWalletToPayeeCreate);
@@ -1093,6 +1119,59 @@ public class TestSDKApplication {
     }
 
 
+    // Create a P2P currency exchange with a counterparty payee
+    private static P2PCurrencyExchange createP2PCurrencyExchange(UUID profileId, UUID fundingSourceId, UUID counterpartyPayeeId) {
+        try {
+            Date date = new Date();
+            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
+
+            BigDecimal exchangeRate = new BigDecimal(0.1);
+            P2PCurrencyExchangeCreate p2PCurrencyExchangeCreate = new P2PCurrencyExchangeBuilder()
+                    .setAmount(30).setCurrency(Currency.GBP).setCounterpartyCurrency(Currency.EUR)
+                    .setExchangeRate(exchangeRate).setFundingSourceId(fundingSourceId).setCounterpartyPayeeId(counterpartyPayeeId)
+                    .setExecutionDate(now).setAdditionalInformation("P2P 30 GBP for 3 EUR").build();
+
+            return P2PCurrencyExchangeService.createP2PCurrencyExchange(profileId, p2PCurrencyExchangeCreate);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get all currency exchanges for a profile
+    private static P2PCurrencyExchangePage getP2PCurrencyExchanges(UUID profileId) {
+        try {
+            return P2PCurrencyExchangeService.getAll(profileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a page of currency exchanges for a profile
+    private static P2PCurrencyExchangePage getP2PCurrencyExchangePage(UUID profileId, int pageNum, int pageSize) {
+        try {
+            return P2PCurrencyExchangeService.getPage(profileId, pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a currency exchange belonging to a profile
+    private static P2PCurrencyExchange getP2PCurrencyExchange(UUID profileId, UUID currencyExchangeId) {
+        try {
+            return P2PCurrencyExchangeService.get(profileId, currencyExchangeId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
     // Get all payments for a profile
     private static PaymentPage getPayments(UUID profileId) {
         try {
@@ -1102,6 +1181,7 @@ public class TestSDKApplication {
             return null;
         }
     }
+
 
     // Get a page of payments for a profile
     private static PaymentPage getPaymentPage(UUID profileId, int pageNum, int pageSize) {
