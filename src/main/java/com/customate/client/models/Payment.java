@@ -2,7 +2,7 @@ package com.customate.client.models;
 
 import com.customate.client.enums.Currency;
 import com.customate.client.enums.PaymentStatus;
-import com.customate.client.enums.TransactionName;
+import com.customate.client.enums.PaymentScenario;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,7 +36,7 @@ public class Payment extends BaseModel {
     @JsonProperty("currency")
     private Currency currency;
     @JsonProperty("scenario")
-    private TransactionName scenario;
+    private PaymentScenario scenario;
     @JsonProperty("metadata")
     private JsonNode paymentMetadata;
     @JsonProperty("wallet_id")

@@ -10,27 +10,30 @@ package com.customate.client.enums;
  * @version 1.0
  */
 public enum PaymentScenario {
-    IncomingContribution("IncomingContribution"),
-    OutgoingInternalFromWallet("OutgoingInternalFromWallet"),
+    IncomingContribution("Override"),
+    OutgoingInternal("OutgoingInternal"),
     OutgoingInternalFromVirtualWallet("OutgoingInternalFromVirtualWallet"),
     IncomingInternal("IncomingInternal"),
     WalletToVirtualWallet("WalletToVirtualWallet"),
     VirtualWalletToWallet("VirtualWalletToWallet"),
-    WalletToIban("WalletToIban"),
-    IbanToWallet("IbanToWallet"),
+    External("External"),
+    IncomingBankTransfer("IncomingBankTransfer"),
     CreditCardToWallet("CreditCardToWallet"),
     CreditCardToVirtualWallet("CreditCardToVirtualWallet"),
     CreditCardWithOutgoingInternal("CreditCardWithOutgoingInternal"),
     CreditCardToIban("CreditCardToIban"),
-    DirectDebitToWallet("DirectDebitToWallet"),
+    IncomingDirectDebit("IncomingDirectDebit"),
     DirectDebitToVirtualWallet("DirectDebitToVirtualWallet"),
-    DirectDebitWithOutgoingInternal("DirectDebitWithOutgoingInternal"),
-    DirectDebitToIban("DirectDebitToIban"),
+    DirectDebitToInternal("DirectDebitToInternal"),
+    DirectDebitToExternal("DirectDebitToExternal"),
     IncomingFee("IncomingFee"),
     IncomingTax("IncomingTax"),
     OpenBankingToWallet("OpenBankingToWallet"),
-    External("External"),
-    IncomingBankTransfer("IncomingBankTransfer");
+    CurrencyExchangeFeeAndTax("CurrencyExchangeFeeAndTax"),
+    OutgoingExchangeFromInitiator("OutgoingExchangeFromInitiator"), // Initiator sells currency A
+    IncomingExchangeToCounterparty("IncomingExchangeToCounterparty"), // Counterparty receives currency A
+    OutgoingExchangeFromCounterparty("OutgoingExchangeFromCounterparty"), // Counterparty sells currency B
+    IncomingExchangeToInitiator("IncomingExchangeToInitiator"); // Initiator receives currency B
 
     private String paymentScenario;
 

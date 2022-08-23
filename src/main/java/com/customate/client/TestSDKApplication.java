@@ -47,7 +47,7 @@ public class TestSDKApplication {
             LOGGER.info("API Status\n" + status.asJson() + "\n");
 
             // Create a profile - emails and phone number must be unique in the database
-            Profile profile = createProfile("johnlennon520566@music.com", "+447773200566");
+            Profile profile = createProfile("johnlennon520568@music.com", "+447773200568");
             LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
             // Force-verify the profile
@@ -59,7 +59,7 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney433@music.com", "+447773200433");
+			Profile profile2 = createProfile("paulmccartney435@music.com", "+447773200435");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -265,11 +265,11 @@ public class TestSDKApplication {
 					nonProcessingDatesType.asJson() + "\n");
 
 			// Get all transactions for the profile
-			//TransactionPage transactions = getTransactions(profile.getId());
-			//LOGGER.info("Transactions for profile, ID: " + profile.getId() + "\n" + transactions.asJson() + "\n");
+			TransactionPage transactions = getTransactions(profile.getId());
+			LOGGER.info("Transactions for profile, ID: " + profile.getId() + "\n" + transactions.asJson() + "\n");
 
 			// Get a page of transactions
-			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 3);
+			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 25);
 			LOGGER.info("Page 1 with 3 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
 
 			// Get a transaction
@@ -280,9 +280,9 @@ public class TestSDKApplication {
 
             // Create a P2P currency exchange
             // Hard-coded EUR payee ID that has funds in localhost: 3d7b7bde-261d-49a3-a9cf-579beb20fd63
-            UUID eurCounterpartyPayeeId = UUID.fromString("3d7b7bde-261d-49a3-a9cf-579beb20fd63");
-            P2PCurrencyExchange p2pCurrencyExchange = createP2PCurrencyExchange(profile.getId(), gbpFundingSourceId, eurCounterpartyPayeeId);
-            LOGGER.info("P2P currency exchange, 30p for 3 Euro cents\n" + p2pCurrencyExchange.asJson() + "\n");
+            //UUID eurCounterpartyPayeeId = UUID.fromString("3d7b7bde-261d-49a3-a9cf-579beb20fd63");
+            //P2PCurrencyExchange p2pCurrencyExchange = createP2PCurrencyExchange(profile.getId(), gbpFundingSourceId, eurCounterpartyPayeeId);
+            //LOGGER.info("P2P currency exchange, 30p for 3 Euro cents\n" + p2pCurrencyExchange.asJson() + "\n");
 
             // Get the list of currency exchanges
             P2PCurrencyExchangePage p2pCurrencyExchanges = getP2PCurrencyExchanges(profile.getId());
