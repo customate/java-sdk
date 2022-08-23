@@ -284,7 +284,7 @@ public class TestSDKApplication {
             //P2PCurrencyExchange p2pCurrencyExchange = createP2PCurrencyExchange(profile.getId(), gbpFundingSourceId, eurCounterpartyPayeeId);
             //LOGGER.info("P2P currency exchange, 30p for 3 Euro cents\n" + p2pCurrencyExchange.asJson() + "\n");
 
-            // Get the list of currency exchanges
+            // Get the list of currency exchanges (will be empty)
             P2PCurrencyExchangePage p2pCurrencyExchanges = getP2PCurrencyExchanges(profile.getId());
             LOGGER.info("P2P currency exchanges for profile, ID: " + profile.getId() + "\n" + p2pCurrencyExchanges.asJson() + "\n");
 
