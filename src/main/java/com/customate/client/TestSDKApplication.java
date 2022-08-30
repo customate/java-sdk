@@ -130,7 +130,7 @@ public class TestSDKApplication {
 			Payee bankAccountPayeeProfile2 = createBankAccountPayee(profile2.getId());
 			LOGGER.info("Create bank account payee for profile 2, ID: " + profile2.getId() + "\n" +
 					bankAccountPayeeProfile2.asJson() + "\n");
-            
+
 			// Get all payees for the profile
 			PayeePage payees = getPayees(profile.getId());
 			LOGGER.info("Payees for profile, ID: " + profile.getId() + "\n" + payees.asJson() + "\n");
@@ -238,6 +238,13 @@ public class TestSDKApplication {
 				}
 			}
 
+			UUID eurPayeeIdProfile1 = null;
+			for (Payee payee : payeesProfile1.getItems()) {
+				if (payee.getCurrency().equals(Currency.EUR) && payee.getPayeeType().equals(PayeeType.wallet)) {
+					eurPayeeIdProfile1 = payee.getId();
+				}
+			}
+
 			// Create a services payment which simulates an incoming bank payment (sandbox only).
 			// Returns the ID of the saxo_transferinstruction in the sandbox database.
 			SaxoTransferInstruction saxoTransferInstruction = createServicePayment(profile.getId(), gbpPayeeIdProfile1);
@@ -296,6 +303,13 @@ public class TestSDKApplication {
             P2PCurrencyExchangePage p2pCurrencyExchangePage = getP2PCurrencyExchangePage(profile.getId(), 1, 3);
             LOGGER.info("Page 1 with 3 P2P currency exchanges for profile, ID: " + profile.getId() + "\n" + p2pCurrencyExchangePage.asJson() + "\n");
 
+            //RFQ get quote
+            RFQGetQuoteResponse rfqGetQuoteResponse = getRFQCurrencyExchangeQuote(profile.getId(), gbpFundingSourceId, eurPayeeIdProfile1);
+            LOGGER.info("RFQ currency exchanges for profile, ID: " + profile.getId() + "\n" + rfqGetQuoteResponse.asJson() + "\n");
+            //RFQ execute quote
+            String rfqExecuteQuoteResponse = executeRFQCurrencyExchangeQuote(profile.getId(),rfqGetQuoteResponse.getId());
+            LOGGER.info("RFQ currency exchanges for profile, ID: " + profile.getId() + "\n" + rfqExecuteQuoteResponse + "\n");
+
             // Get the latest currency exchange
             int size = p2pCurrencyExchangePage.getItems().size();
             if (size > 0) {
@@ -352,7 +366,7 @@ public class TestSDKApplication {
 			// Create a webhook
 			Webhook webhook = createWebhook("https://webhook.site/5e4cfa5d-0ae5-447c-ba36-0ecd99adc231");
 			LOGGER.info("Create webhook\n" + webhook.asJson() + "\n");
-            
+
 			// Rename the webhook
 			webhook.setCallbackUrl("https://www.renamedsite.com/listener");
 			Webhook webhook1 = updateWebhook(webhook);
@@ -404,7 +418,6 @@ public class TestSDKApplication {
             LOGGER.error("Exception: " + e.getMessage());
         }
     }
-
 
     /**
      * These methods call the API services. Use these examples in your code.
@@ -1179,6 +1192,27 @@ public class TestSDKApplication {
         }
     }
 
+    private static RFQGetQuoteResponse getRFQCurrencyExchangeQuote(UUID profileId, UUID fundingSourceId, UUID payeeId) {
+        try {
+            RFQGetQuoteRequest rfqGetQuoteRequest = new RFQGetQuoteRequest(100, Currency.GBP, Currency.GBP, Currency.EUR,
+                    fundingSourceId, payeeId, "P2P 30 GBP for 3 EUR");
+
+            return RFQCurrencyExchangeService.getQuote(profileId, rfqGetQuoteRequest);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    private static String executeRFQCurrencyExchangeQuote(UUID profileId, UUID quoteId) {
+        try {
+            return RFQCurrencyExchangeService.executeQuote(profileId, quoteId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
     // Get all payments for a profile
     private static PaymentPage getPayments(UUID profileId) {
