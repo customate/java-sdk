@@ -47,8 +47,10 @@ public class TestSDKApplication {
             LOGGER.info("API Status\n" + status.asJson() + "\n");
 
             // Create a profile - emails and phone number must be unique in the database
-            Profile profile = createProfile("johnlennon520568@music.com", "+447773200568");
+            Profile profile = createProfile("johnlennon520582@music.com", "+447773200582");
             LOGGER.info("Create profile\n" + profile.asJson() + "\n");
+            //Profile profile = getProfile(UUID.fromString("796a8480-7914-4856-8f4a-9352878962c9")); // savbalac136@gmail.com
+            //LOGGER.info("Profile 1\n" + profile.asJson() + "\n");
 
             // Force-verify the profile
             VerificationResponse verificationResponse = forceVerifyProfile(profile);
@@ -59,8 +61,10 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney435@music.com", "+447773200435");
+			Profile profile2 = createProfile("paulmccartney449@music.com", "+447773200449");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
+            //Profile profile2 = getProfile(UUID.fromString("17121133-a8f3-4f35-b26f-76a74f96f843")); // bobby+10@didcoding.com
+            //LOGGER.info("Profile 2\n" + profile.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
 			//VerificationResponse verificationResponse2 = verifyProfile(profile2);
@@ -715,8 +719,12 @@ public class TestSDKApplication {
                     .setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourceCreatePayer)
                     .setFundingSourceAccount(fundingSourceAccount).build();
 
+            // Create a new title (must be unique)
+            UUID uuid = UUID.randomUUID();
+            String newTitle = "Direct Debit Source " + uuid;
+
             FundingSourceCreate fundingSourceCreate =
-                    new FundingSourceBuilder().setTitle("Direct Debit Source")
+                    new FundingSourceBuilder().setTitle(newTitle)
                             .setCurrency(Currency.GBP).setFundingSourceType(FundingSourceType.direct_debit)
                             .setFundingSourceCreateData(fundingSourceCreateData).build();
 
