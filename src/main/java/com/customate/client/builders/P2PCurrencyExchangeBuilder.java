@@ -19,13 +19,12 @@ import java.util.UUID;
 public class P2PCurrencyExchangeBuilder {
 
     private long amount;
-    private Currency currency;
-    private Currency counterpartyCurrency;
+    private Currency currencyToSell;
     private BigDecimal exchangeRate;
-    private UUID fundingSourceId;
-    private UUID counterpartyPayeeId;
+    private UUID payeeId;
     private String executionDate;
-    private String additionalInformation;
+    private String description;
+    private JsonNode metadata;
 
     /**
      * Sets the amount.
@@ -41,22 +40,11 @@ public class P2PCurrencyExchangeBuilder {
     /**
      * Sets the currency to sell.
      *
-     * @param currency  Currency to sell.
+     * @param currencyToSell  Currency to sell.
      * @return P2PCurrencyExchangeBuilder  The updated P2P currency exchange builder.
      */
-    public P2PCurrencyExchangeBuilder setCurrency(Currency currency) {
-        this.currency = currency;
-        return this;
-    }
-
-    /**
-     * Sets the counterparty currency to buy.
-     *
-     * @param counterpartyCurrency  Currency to buy.
-     * @return P2PCurrencyExchangeBuilder  The updated P2P currency exchange builder.
-     */
-    public P2PCurrencyExchangeBuilder setCounterpartyCurrency(Currency counterpartyCurrency) {
-        this.counterpartyCurrency = counterpartyCurrency;
+    public P2PCurrencyExchangeBuilder setCurrency(Currency currencyToSell) {
+        this.currencyToSell = currencyToSell;
         return this;
     }
 
@@ -72,24 +60,13 @@ public class P2PCurrencyExchangeBuilder {
     }
 
     /**
-     * Sets the funding source ID.
-     *
-     * @param fundingSourceId  Funding Source ID.
-     * @return P2PCurrencyExchangeBuilder  The updated P2P currency exchange builder.
-     */
-    public P2PCurrencyExchangeBuilder setFundingSourceId(UUID fundingSourceId) {
-        this.fundingSourceId = fundingSourceId;
-        return this;
-    }
-
-    /**
      * Sets the counterparty's payee ID.
      *
-     * @param counterpartyPayeeId  Counterparty Payee ID.
+     * @param payeeId  Counterparty Payee ID.
      * @return P2PCurrencyExchangeBuilder  The updated P2P currency exchange builder.
      */
-    public P2PCurrencyExchangeBuilder setCounterpartyPayeeId(UUID counterpartyPayeeId) {
-        this.counterpartyPayeeId = counterpartyPayeeId;
+    public P2PCurrencyExchangeBuilder setPayeeId(UUID payeeId) {
+        this.payeeId = payeeId;
         return this;
     }
 
@@ -107,11 +84,22 @@ public class P2PCurrencyExchangeBuilder {
     /**
      * Sets the description.
      *
-     * @param additionalInformation  Additional information.
+     * @param description  Description.
      * @return P2PCurrencyExchangeBuilder  The updated P2P currency exchange builder.
      */
-    public P2PCurrencyExchangeBuilder setAdditionalInformation(String additionalInformation) {
-        this.additionalInformation = additionalInformation;
+    public P2PCurrencyExchangeBuilder setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    /**
+     * Sets the metadata.
+     *
+     * @param metadata  Metadata.
+     * @return P2PCurrencyExchangeBuilder  The updated P2P currency exchange builder.
+     */
+    public P2PCurrencyExchangeBuilder setMetadata(JsonNode metadata) {
+        this.metadata = metadata;
         return this;
     }
 
@@ -121,8 +109,7 @@ public class P2PCurrencyExchangeBuilder {
      * @return PaymentWalletToPayeeCreate  The P2P currency exchange.
      */
     public P2PCurrencyExchangeCreate build() {
-        return new P2PCurrencyExchangeCreate(amount, currency, counterpartyCurrency, exchangeRate,
-                fundingSourceId, counterpartyPayeeId, executionDate, additionalInformation);
+        return new P2PCurrencyExchangeCreate(amount, currencyToSell, exchangeRate, payeeId, executionDate, description, metadata);
     }
 
 }

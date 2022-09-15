@@ -40,7 +40,9 @@ public enum TransactionName {
     OutgoingExchangeFromInitiator("OutgoingExchangeFromInitiator"), // Initiator sells currency A
     IncomingExchangeToCounterparty("IncomingExchangeToCounterparty"), // Counterparty receives currency A
     OutgoingExchangeFromCounterparty("OutgoingExchangeFromCounterparty"), // Counterparty sells currency B
-    IncomingExchangeToInitiator("IncomingExchangeToInitiator"); // Initiator receives currency B
+    IncomingExchangeToInitiator("IncomingExchangeToInitiator"), // Initiator receives currency B
+    SaxoCurrencyExchange("SaxoCurrencyExchange"),
+    IncomingSaxoExchange("IncomingSaxoExchange");
 
     private String transactionName;
 

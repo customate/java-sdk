@@ -46,11 +46,30 @@ public class TestSDKApplication {
 			Status status = getStatus();
 			LOGGER.info("API Status\n" + status.asJson() + "\n");
 
+			// Create a webhook
+			Webhook webhook = createWebhook("https://webhook.site/9ea74946-4ef6-49b9-8ff6-2bbec59be700");
+			LOGGER.info("Create webhook\n" + webhook.asJson() + "\n");
+
+			// Rename the webhook
+			webhook.setCallbackUrl("https://www.renamedsite.com/listener");
+			Webhook webhook1 = updateWebhook(webhook);
+			LOGGER.info("Update webhook\n" + webhook1.asJson() + "\n");
+
+			// Get the webhook
+			Webhook webhook2 = getWebhook(webhook1.getId());
+			LOGGER.info("Get webhook, ID: " + webhook2.getId() + "\n" + webhook2.asJson() + "\n");
+
+			// Get all webhooks
+			WebhookPage webhooks = getWebhooks();
+			LOGGER.info("All webhooks\n" + webhooks.asJson() + "\n");
+
+			// Get a page of webhooks
+			WebhookPage webhookPage = getWebhookPage(1, 1);
+			LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
+
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("johnlennon520582@music.com", "+447773200582");
+			Profile profile = createProfile("johnlennon520583@music.com", "+447773200583");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
-			//Profile profile = getProfile(UUID.fromString("796a8480-7914-4856-8f4a-9352878962c9")); // savbalac136@gmail.com
-			//LOGGER.info("Profile 1\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
 			VerificationResponse verificationResponse = forceVerifyProfile(profile);
@@ -61,10 +80,8 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney449@music.com", "+447773200449");
+			Profile profile2 = createProfile("paulmccartney450@music.com", "+447773200450");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
-			//Profile profile2 = getProfile(UUID.fromString("17121133-a8f3-4f35-b26f-76a74f96f843")); // bobby+10@didcoding.com
-			//LOGGER.info("Profile 2\n" + profile.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
 			//VerificationResponse verificationResponse2 = verifyProfile(profile2);
@@ -171,7 +188,7 @@ public class TestSDKApplication {
 			// The following payments expect profile 1 to have funds in their GBP wallet.
 			// Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE PAYMENT!
 			try {
-				Thread.sleep(180000); // 180 seconds
+				Thread.sleep(180); // 180 seconds
 			} catch (InterruptedException e) {
 				LOGGER.error("InterruptedException: " + e.getMessage());
 			}
@@ -238,6 +255,13 @@ public class TestSDKApplication {
 				}
 			}
 
+			UUID eurPayeeIdProfile1 = null;
+			for (Payee payee : payeesProfile1.getItems()) {
+				if (payee.getCurrency().equals(Currency.EUR) && payee.getPayeeType().equals(PayeeType.wallet)) {
+					eurPayeeIdProfile1 = payee.getId();
+				}
+			}
+
 			// Create a services payment which simulates an incoming bank payment (sandbox only).
 			// Returns the ID of the saxo_transferinstruction in the sandbox database.
 			SaxoTransferInstruction saxoTransferInstruction = createServicePayment(profile.getId(), gbpPayeeIdProfile1);
@@ -285,7 +309,7 @@ public class TestSDKApplication {
 			// Create a P2P currency exchange
 			// Hard-coded EUR payee ID that has funds in localhost: 3d7b7bde-261d-49a3-a9cf-579beb20fd63
 			//UUID eurCounterpartyPayeeId = UUID.fromString("3d7b7bde-261d-49a3-a9cf-579beb20fd63");
-			//P2PCurrencyExchange p2pCurrencyExchange = createP2PCurrencyExchange(profile.getId(), gbpFundingSourceId, eurCounterpartyPayeeId);
+			//P2PCurrencyExchange p2pCurrencyExchange = createP2PCurrencyExchange(profile.getId(), eurCounterpartyPayeeId);
 			//LOGGER.info("P2P currency exchange, 30p for 3 Euro cents\n" + p2pCurrencyExchange.asJson() + "\n");
 
 			// Get the list of currency exchanges (will be empty)
@@ -303,6 +327,14 @@ public class TestSDKApplication {
 				P2PCurrencyExchange latestP2PCurrencyExchange = getP2PCurrencyExchange(profile.getId(), currencyExchangeId);
 				LOGGER.info("Currency exchange for profile, ID: " + profile.getId() + "\n" + latestP2PCurrencyExchange.asJson() + "\n");
 			}
+
+			// Currency exchange - get a quoted exchange rate
+			CurrencyExchange currencyExchange = getCurrencyExchangeQuote(profile.getId());
+			LOGGER.info("Currency exchange, including quote, for profile ID: " + profile.getId() + "\n" + currencyExchange.asJson() + "\n");
+
+			// Currency exchange - execute the trade
+			CurrencyExchangeExecuteQuoteResponse exchangeRateResponse = executeCurrencyExchange(profile.getId(), currencyExchange.getId());
+			LOGGER.info("Executed currency exchange for profile, ID: " + profile.getId() + "\n" + exchangeRateResponse.asJson() + "\n");
 
 			// Create a schedule, paying profile 2
 			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
@@ -349,27 +381,6 @@ public class TestSDKApplication {
 			statusCode = cancelSchedule(profile.getId(), schedule3.getId());
 			LOGGER.info("Cancel schedule, ID: " + schedule3.getId() + ", status code: " + statusCode + "\n");
 
-			// Create a webhook
-			Webhook webhook = createWebhook("https://webhook.site/5e4cfa5d-0ae5-447c-ba36-0ecd99adc231");
-			LOGGER.info("Create webhook\n" + webhook.asJson() + "\n");
-
-			// Rename the webhook
-			webhook.setCallbackUrl("https://www.renamedsite.com/listener");
-			Webhook webhook1 = updateWebhook(webhook);
-			LOGGER.info("Update webhook\n" + webhook1.asJson() + "\n");
-
-			// Get the webhook
-			Webhook webhook2 = getWebhook(webhook1.getId());
-			LOGGER.info("Get webhook, ID: " + webhook2.getId() + "\n" + webhook2.asJson() + "\n");
-
-			// Get all webhooks
-			WebhookPage webhooks = getWebhooks();
-			LOGGER.info("All webhooks\n" + webhooks.asJson() + "\n");
-
-			// Get a page of webhooks
-			WebhookPage webhookPage = getWebhookPage(1, 1);
-			LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
-
 			// Delete the webhook
 			statusCode = deleteWebhook(webhookPage.getItems().get(0).getId());
 			LOGGER.info("Delete webhook, ID: 17ef373f-aff6-4a6d-99e5-98190f1b699e, status code: " + statusCode + "\n");
@@ -404,7 +415,6 @@ public class TestSDKApplication {
 			LOGGER.error("Exception: " + e.getMessage());
 		}
 	}
-
 
 	/**
 	 * These methods call the API services. Use these examples in your code.
@@ -1128,16 +1138,20 @@ public class TestSDKApplication {
 
 
 	// Create a P2P currency exchange with a counterparty payee
-	private static P2PCurrencyExchange createP2PCurrencyExchange(UUID profileId, UUID fundingSourceId, UUID counterpartyPayeeId) {
+	private static P2PCurrencyExchange createP2PCurrencyExchange(UUID profileId, UUID counterpartyPayeeId) {
 		try {
 			Date date = new Date();
 			String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
 			BigDecimal exchangeRate = new BigDecimal(0.1);
+
 			P2PCurrencyExchangeCreate p2PCurrencyExchangeCreate = new P2PCurrencyExchangeBuilder()
-					.setAmount(30).setCurrency(Currency.GBP).setCounterpartyCurrency(Currency.EUR)
-					.setExchangeRate(exchangeRate).setFundingSourceId(fundingSourceId).setCounterpartyPayeeId(counterpartyPayeeId)
-					.setExecutionDate(now).setAdditionalInformation("P2P 30 GBP for 3 EUR").build();
+					.setAmount(30).setCurrency(Currency.GBP).setExchangeRate(exchangeRate).setPayeeId(counterpartyPayeeId)
+					.setExecutionDate(now).setDescription("P2P 30 GBP for 3 EUR").setMetadata(metadata).build();
 
 			return P2PCurrencyExchangeService.createP2PCurrencyExchange(profileId, p2PCurrencyExchangeCreate);
 		} catch (Exception e) {
@@ -1179,6 +1193,34 @@ public class TestSDKApplication {
 		}
 	}
 
+
+	// Get a currency exchange quote
+	private static CurrencyExchange getCurrencyExchangeQuote(UUID profileId) {
+		try {
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+			CurrencyExchangeCreate currencyExchangeCreate = new CurrencyExchangeBuilder()
+					.setAmount(100).setCurrencyToSell(Currency.GBP).setCurrencyToBuy(Currency.EUR)
+					.setDescription("100 GBP for EUR").setMetadata(metadata).build();
+
+			return CurrencyExchangeService.getQuote(profileId, currencyExchangeCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	private static CurrencyExchangeExecuteQuoteResponse executeCurrencyExchange(UUID profileId, UUID quoteId) {
+		try {
+			return CurrencyExchangeService.execute(profileId, quoteId);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
 
 	// Get all payments for a profile
 	private static PaymentPage getPayments(UUID profileId) {

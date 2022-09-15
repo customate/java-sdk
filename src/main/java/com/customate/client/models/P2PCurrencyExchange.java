@@ -2,6 +2,7 @@ package com.customate.client.models;
 
 import com.customate.client.enums.Currency;
 import com.customate.client.enums.CurrencyExchangeStatus;
+import com.customate.client.enums.CurrencyExchangeType;
 import com.customate.client.enums.PaymentStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,6 +35,8 @@ public class P2PCurrencyExchange extends BaseModel {
     private String creationDatetime;
     @JsonProperty("status")
     private CurrencyExchangeStatus currencyExchangeStatus;
+    @JsonProperty("type")
+    private CurrencyExchangeType currencyExchangeType;
     @JsonProperty("funding_source_id")
     private UUID fundingSourceId;
     @JsonProperty("amount")
@@ -41,28 +44,25 @@ public class P2PCurrencyExchange extends BaseModel {
     /**
      * 3-digit ISO currency code
      */
-    @JsonProperty("currency")
-    private Currency currency;
+    @JsonProperty("currency_to_sell")
+    private Currency currencyToSell;
     @JsonProperty("exchange_rate")
     private BigDecimal exchangeRate;
     /**
      * 3-digit ISO currency code
      */
-    @JsonProperty("counterparty_currency")
-    private Currency counterpartyCurrency;
+    @JsonProperty("currency_to_buy")
+    private Currency currencyToBuy;
     @JsonProperty("counterparty_amount")
     private long counterpartyAmount;
-    @JsonProperty("counterparty_payee_id")
-    private UUID counterpartyPayeeId;
-    @JsonProperty("counterparty_email")
-    private String counterpartyEmail;
-    @JsonProperty("additional_information")
-    private String additionalInformation;
-    /**
-     * Execution date in in YYYY-MM-DD format.
-     */
+    @JsonProperty("payee_id")
+    private UUID payeeId;
     @JsonProperty("execution_date")
     private String executionDate;
+    @JsonProperty("description")
+    private String description;
+    @JsonProperty("metadata")
+    private JsonNode metadata;
 
     /**
      * Default constructor.

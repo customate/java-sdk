@@ -62,15 +62,15 @@ public class P2PCurrencyExchangeService {
      * Gets a P2P currency exchange for a profile.
      *
      * @param profileId  Profile ID.
-     * @param currencyExchangeId  The P2P currency exchange ID.
+     * @param p2pCcurrencyExchangeId  The P2P currency exchange ID.
      * @return P2PCurrencyExchange  The P2P currency exchange.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
      * @throws InterruptedException  If there was an interrupted exception sending the request.
      * @throws ApiException  If the API returned errors.
      */
-    public static P2PCurrencyExchange get(UUID profileId, UUID currencyExchangeId) throws URISyntaxException, IOException, InterruptedException, ApiException {
-        HttpResponse<String> response = CustomateClient.get("profiles/" + profileId + "/p2p_currency_exchanges/" + currencyExchangeId);
+    public static P2PCurrencyExchange get(UUID profileId, UUID p2pCcurrencyExchangeId) throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.get("profiles/" + profileId + "/p2p_currency_exchanges/" + p2pCcurrencyExchangeId);
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, P2PCurrencyExchange.class);
