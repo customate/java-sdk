@@ -35,6 +35,7 @@ public enum TransactionName {
     MoneyInDdFeeAndTax("MoneyInDdFeeAndTax"),
     MoneyOutBtFeeAndTax("MoneyOutBtFeeAndTax"),
     OpenBankingToWallet("OpenBankingToWallet"),
+    OpenBankingMandateToWallet("OpenBankingMandateToWallet"),
     MoneyInObFeeAndTax("MoneyInObFeeAndTax"),
     CurrencyExchangeFeeAndTax("CurrencyExchangeFeeAndTax"),
     OutgoingExchangeFromInitiator("OutgoingExchangeFromInitiator"), // Initiator sells currency A

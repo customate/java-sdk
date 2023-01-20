@@ -2,8 +2,6 @@ package com.customate.client.services;
 
 import com.customate.client.CustomateClient;
 import com.customate.client.enums.Currency;
-import com.customate.client.enums.FundingSourceType;
-import com.customate.client.enums.PayeeType;
 import com.customate.client.exceptions.ApiException;
 import com.customate.client.models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -142,6 +140,27 @@ public class PaymentService {
     }
 
     /**
+     * Creates an open banking mandate payment (the JSON format is different when creating and getting payments).
+     *
+     * @param profileId  Profile ID.
+     * @param paymentOpenBankingMandateCreate  The open banking mandate payment to create.
+     * @return PaymentOpenBanking  The open banking payment.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static PaymentOpenBanking createOpenBankingGbp(UUID profileId, PaymentOpenBankingMandateCreate paymentOpenBankingMandateCreate)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response =
+                CustomateClient.post("profiles/" + profileId + "/open_banking_to_wallet_mandate_payments",
+                                     paymentOpenBankingMandateCreate.asJson());
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, PaymentOpenBanking.class);
+    }
+
+    /**
      * Creates a wallet to bank account payment (the JSON format is different when creating and getting payments).
      *
      * @param profileId  Profile ID.
@@ -264,89 +283,6 @@ public class PaymentService {
                 }
             } else {
                 url += "interval_end_date=" + intervalEndDate;
-            }
-        }
-        HttpResponse<String> response = CustomateClient.get(url);
-        String responseBody = response.body();
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(responseBody, NonProcessingDates.class);
-    }
-
-    /**
-     * Gets dates (in a range) that payments will not be processed on (as banks are not open on those days).
-     * Direct debits take up to 7 days to process. In addition, these funding sources take 7 days to be verified.
-     *
-     * @param intervalStartDate  Start date. The current date will be used if not set.
-     * @param intervalEndDate  End date. Current date +1 month will be used if not set.
-     * @param fundingSourceId  Funding source ID.
-     * @param payeeId Payee ID.
-     * @return List<Date>  A list of dates.
-     * @throws URISyntaxException  If there was a problem creating the URI.
-     * @throws IOException  If there was an IO error sending the request.
-     * @throws InterruptedException  If there was an interrupted exception sending the request.
-     * @throws ApiException  If the API returned errors.
-     */
-    public static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate, UUID fundingSourceId, UUID payeeId)
-            throws URISyntaxException, IOException, InterruptedException, ApiException {
-        String url = "non_processing_dates";
-        if (intervalStartDate != null || intervalEndDate != null) {
-            url += "?";
-            if (intervalStartDate != null) {
-                url += "interval_start_date=" + intervalStartDate;
-                if (intervalEndDate != null) {
-                    url += "&interval_end_date=" + intervalEndDate;
-                }
-            } else {
-                url += "interval_end_date=" + intervalEndDate;
-            }
-        }
-        if (fundingSourceId != null & payeeId != null) {
-            if (intervalStartDate != null || intervalEndDate != null) {
-                url += "&" + "funding_source_id=" + fundingSourceId + "&payee_id=" + payeeId;
-            } else {
-                url += "?" + "funding_source_id=" + fundingSourceId + "&payee_id=" + payeeId;
-            }
-        }
-        HttpResponse<String> response = CustomateClient.get(url);
-        String responseBody = response.body();
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(responseBody, NonProcessingDates.class);
-    }
-
-    /**
-     * Gets dates (in a range) that payments will not be processed on (as banks are not open on those days).
-     * Direct debits take up to 7 days to process. In addition, these funding sources take 7 days to be verified.
-     *
-     * @param intervalStartDate  Start date. The current date will be used if not set.
-     * @param intervalEndDate  End date. Current date +1 month will be used if not set.
-     * @param fundingSourceType  Funding source type.
-     * @param payeeType Payee type.
-     * @return List<Date>  A list of dates.
-     * @throws URISyntaxException  If there was a problem creating the URI.
-     * @throws IOException  If there was an IO error sending the request.
-     * @throws InterruptedException  If there was an interrupted exception sending the request.
-     * @throws ApiException  If the API returned errors.
-     */
-    public static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate,
-                                                           FundingSourceType fundingSourceType, PayeeType payeeType)
-            throws URISyntaxException, IOException, InterruptedException, ApiException {
-        String url = "non_processing_dates";
-        if (intervalStartDate != null || intervalEndDate != null) {
-            url += "?";
-            if (intervalStartDate != null) {
-                url += "interval_start_date=" + intervalStartDate;
-                if (intervalEndDate != null) {
-                    url += "&interval_end_date=" + intervalEndDate;
-                }
-            } else {
-                url += "interval_end_date=" + intervalEndDate;
-            }
-        }
-        if (fundingSourceType != null & payeeType != null) {
-            if (intervalStartDate != null || intervalEndDate != null) {
-                url += "&" + "funding_source_type=" + fundingSourceType + "&payee_type=" + payeeType;
-            } else {
-                url += "?" + "funding_source_type=" + fundingSourceType + "&payee_type=" + payeeType;
             }
         }
         HttpResponse<String> response = CustomateClient.get(url);

@@ -21,20 +21,23 @@ import java.util.UUID;
 /**
  * Tests all the endpoints in the Customate Java SDK.
  *
- * One method, createOpenBankingPayment(), loads funds into a user's wallet and requires user intervention:
- * Paste the URI into a browser, enter customer no. 123456789012, PIN 572, password 436 and confirm the payment.
- * You have 1 minute to do this (configurable below). The other payments rely on funds being available.
+ * Method createGbpOpenBankingPayment() loads funds into a user's wallet and requires user intervention:
+ * Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment.
+ * You have 3 minutes to do this (configurable below). The other payments rely on funds being available.
+ *
+ * Similarly, createOpenBankingMandatePayment() relies on the user to authorise the mandate.
+ * Paste the URI into a browser, enter customer number 123456789012, PIN 572, password 436 and confirm the mandate.
  *
  * Date: 08-Mar-21
  * Time: 1:46 PM
  *
  * @author Sav Balac
- * @version 1.2
+ * @version 1.3
  */
 @SpringBootApplication
-public class TestSDKApplication {
+public class TestSDKApplicationOriginal {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplicationOriginal.class);
 
 	// Tests all the endpoints
 	public static void main(String[] args) {
@@ -68,19 +71,19 @@ public class TestSDKApplication {
 			LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("johnlennon520583@music.com", "+447773200583");
+			Profile profile = createProfile("johnlennon520590@music.com", "+447773200590");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
 			VerificationResponse verificationResponse = forceVerifyProfile(profile);
-			LOGGER.info("Force-verify of profile\n" + verificationResponse.asJson() + "\n");
+			LOGGER.info("Force-verification of profile\n" + verificationResponse.asJson() + "\n");
 
 			// Get the newly-created profile
 			Profile verifiedProfile = getProfile(profile.getId());
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney450@music.com", "+447773200450");
+			Profile profile2 = createProfile("paulmccartney457@music.com", "+447773200457");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -89,7 +92,7 @@ public class TestSDKApplication {
 
 			// Force-verify the second profile
 			VerificationResponse verificationResponse3 = forceVerifyProfile(profile2);
-			LOGGER.info("Force-verify of profile 2\n" + verificationResponse3.asJson() + "\n");
+			LOGGER.info("Force-verification of profile 2\n" + verificationResponse3.asJson() + "\n");
 
 			// Update the profile's address from Westminster Cathedral to Westminster Abbey
 			Profile updatedProfile = updateProfile(profile);
@@ -177,18 +180,18 @@ public class TestSDKApplication {
 			// Create a GBP open banking payment to load funds into the profile
 			PaymentOpenBanking paymentOpenBankingGbp = createGbpOpenBankingPayment(profile.getId());
 			LOGGER.info("GBP open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingGbp.asJson() + "\n");
-			LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
+			LOGGER.info("Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment. YOU HAVE 3 MINUTES!\n");
 
 			// Create a GBP open banking payment to load funds into profile 2
 			PaymentOpenBanking paymentOpenBankingGbp2 = createGbpOpenBankingPayment(profile2.getId());
 			LOGGER.info("GBP open banking to wallet payment for profile, ID: " + profile2.getId() + "\n" + paymentOpenBankingGbp2.asJson() + "\n");
-			LOGGER.info("Paste the URI into a browser and confirm the payment in their sandbox. YOU HAVE 3 MINUTES!\n");
+			LOGGER.info("Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment. YOU HAVE 3 MINUTES!\n");
 
 			// To complete the open banking payments, user intervention is required, i.e. paste the auth_uri into a browser.
 			// The following payments expect profile 1 to have funds in their GBP wallet.
-			// Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE PAYMENT!
+			// Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE PAYMENTS!
 			try {
-				Thread.sleep(180); // 180 seconds
+				Thread.sleep(180000); // 180 seconds
 			} catch (InterruptedException e) {
 				LOGGER.error("InterruptedException: " + e.getMessage());
 			}
@@ -200,6 +203,45 @@ public class TestSDKApplication {
 			//} else {
 			//    LOGGER.info("EUR Open banking to wallet payment failed (invalid IBAN) for profile, ID: " + profile.getId() + "\n");
 			//}
+
+			// Get open banking mandate providers in the UK
+			OpenBankingMandateProviderPage openBankingMandateProviderPage = getOpenBankingMandateProviders();
+			LOGGER.info("Open banking mandate providers (banks) in the UK: " + "\n" + openBankingMandateProviderPage.asJson() + "\n");
+
+			// Create a mandate
+			OpenBankingMandateResponse newMandate = createOpenBankingMandate(profile.getId());
+			LOGGER.info("New mandate, for profile, ID: " + profile.getId() + "\n" + newMandate.asJson() + "\n");
+			LOGGER.info("Paste the URI into a browser, enter customer number 123456789012, PIN 572, password 436 and confirm the mandate. YOU HAVE 3 MINUTES!\n");
+
+			// To authorise the open banking mandate (and to then make payments using that mandate),
+			// user intervention is required, i.e. paste the uri into a browser.
+			// Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE MANDATE!
+			try {
+				Thread.sleep(180000); // 180 seconds
+			} catch (InterruptedException e) {
+				LOGGER.error("InterruptedException: " + e.getMessage());
+			}
+
+			// Get all mandates for the profile
+			OpenBankingMandatePage mandates = getOpenBankingMandates(profile.getId());
+			LOGGER.info("Mandates for profile, ID: " + profile.getId() + "\n" + mandates.asJson() + "\n");
+
+			// Get a page of mandates
+			OpenBankingMandatePage mandatePage = getOpenBankingMandatePage(profile.getId(), 1, 3);
+			LOGGER.info("Page 1 with 3 mandates per page for profile, ID: " + profile.getId() + "\n" + mandatePage.asJson() + "\n");
+
+			// Get the mandate
+			OpenBankingMandate firstMandate = getOpenBankingMandate(profile.getId(), newMandate.getId());
+			LOGGER.info("Open banking mandate for profile, ID: " + profile.getId() + "\n" + firstMandate.asJson() + "\n");
+
+			// Create a mandate payment
+			PaymentOpenBanking mandatePayment = createOpenBankingMandatePayment(profile.getId(), newMandate.getId());
+			LOGGER.info("New mandate payment, for profile, ID: " + profile.getId() + "\n" + mandatePayment.asJson() + "\n");
+
+			// Delete the mandate
+			int statusCode = deleteOpenBankingMandate(profile.getId(), newMandate.getId());
+			LOGGER.info("Deleted open banking mandate, ID: " + newMandate.getId() + " from profile, ID: " +
+					profile.getId() + ", status code: " + statusCode + "\n");
 
 			// Create a GBP wallet to bank account payment for profile 1
 			Payment walletToBankAccountPayment = createWalletToBankAccountPayment(profile2.getId(), bankAccountPayeeProfile2.getId());
@@ -230,7 +272,7 @@ public class TestSDKApplication {
 
 			// Create a single direct debit to wallet payment, paying profile 2.
 			// The funding source must be of type direct debit and the payee must be of type wallet.
-			// This will fail as the funding source hasn't isn't valid yet.
+			// This will fail as the funding source isn't valid yet.
 			//Payment directDebitToWalletPayment = createDirectDebitToWalletPayment(profile2.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
 			//LOGGER.info("Single direct debit to wallet payment paying profile 2, ID: " + profile2.getId() + "\n" + directDebitToWalletPayment.asJson() + "\n");
 
@@ -280,18 +322,6 @@ public class TestSDKApplication {
 			NonProcessingDates nonProcessingDates = getNonProcessingDates(today, nextWeek);
 			LOGGER.info("Dates in the next 7 days when banks are closed and cannot process payments\n" + nonProcessingDates.asJson() + "\n");
 
-			// Get the list of non-processing dates, specifying the unverified direct debit funding source ID and bank account payee ID.
-			// It takes 7 days to verify the funding source and 7 days to process a DD payment, so there are 14 dates.
-			NonProcessingDates nonProcessingDatesId = getNonProcessingDates(today, twoWeeksTime, fundingSource.getId(), bankAccountPayeeProfile2.getId());
-			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source and bank account payee\n" +
-					nonProcessingDatesId.asJson() + "\n");
-
-			// Get the list of non-processing dates, specifying the direct debit funding source type and bank account payee type.
-			// It takes 7 days to process a DD payment, so there are 7 dates.
-			NonProcessingDates nonProcessingDatesType = getNonProcessingDates(today, nextWeek, FundingSourceType.direct_debit, PayeeType.bank_account);
-			LOGGER.info("Dates that banks are closed and cannot process payments for DD funding source type and bank account payee type\n" +
-					nonProcessingDatesType.asJson() + "\n");
-
 			// Get all transactions for the profile
 			TransactionPage transactions = getTransactions(profile.getId());
 			LOGGER.info("Transactions for profile, ID: " + profile.getId() + "\n" + transactions.asJson() + "\n");
@@ -306,7 +336,8 @@ public class TestSDKApplication {
 				LOGGER.info("Transaction for profile, ID: " + profile.getId() + "\n" + transaction.asJson() + "\n");
 			}
 
-			// Create a P2P currency exchange
+			// Create a Peer-to-peer (P2P) currency exchange - this exchanges GBP from profile 1 with EUR from profile 2
+			// Need to specify the profile 2's payee ID in EUR
 			// Hard-coded EUR payee ID that has funds in localhost: 3d7b7bde-261d-49a3-a9cf-579beb20fd63
 			//UUID eurCounterpartyPayeeId = UUID.fromString("3d7b7bde-261d-49a3-a9cf-579beb20fd63");
 			//P2PCurrencyExchange p2pCurrencyExchange = createP2PCurrencyExchange(profile.getId(), eurCounterpartyPayeeId);
@@ -328,7 +359,7 @@ public class TestSDKApplication {
 				LOGGER.info("Currency exchange for profile, ID: " + profile.getId() + "\n" + latestP2PCurrencyExchange.asJson() + "\n");
 			}
 
-			// Currency exchange - get a quoted exchange rate
+			// Currency exchange - this exchanges funds in one currency for another for the profile - get a quoted exchange rate
 			CurrencyExchange currencyExchange = getCurrencyExchangeQuote(profile.getId());
 			LOGGER.info("Currency exchange, including quote, for profile ID: " + profile.getId() + "\n" + currencyExchange.asJson() + "\n");
 
@@ -374,7 +405,7 @@ public class TestSDKApplication {
 			LOGGER.info("GBP funding source for profile, ID: " + fs.asJson() + "\n");
 
 			// Cancel the first schedule
-			int statusCode = cancelSchedule(profile.getId(), schedule.getId());
+			statusCode = cancelSchedule(profile.getId(), schedule.getId());
 			LOGGER.info("Cancel schedule, ID: " + schedule.getId() + ", status code: " + statusCode + "\n");
 
 			// Cancel the second schedule
@@ -504,6 +535,7 @@ public class TestSDKApplication {
 					.setLine3("Westminster").setCity("London").setLocality("Greater London").setPostcode("SW1P 1LT")
 					.setCountry("GB").build();
 			profile.setAddress(address);
+			profile.setType(ProfileType.personal);
 			return ProfileService.update(profile);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
@@ -1016,7 +1048,7 @@ public class TestSDKApplication {
 					.setAmount(10000).setDescription("Deposit for Flat 1").setCountry("GB").setCurrency(Currency.GBP)
 					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
 					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("mock-payments-gb-redirect")
-					.setPayerName("Paul McCartney").setBeneficiaryName("Tesco LTD").build();
+					.setPayerName("Paul McCartney").setBeneficiaryName("Paul McCartney").build();
 
 			return PaymentService.createOpenBankingGbp(profileId, paymentOpenBankingGbpCreate);
 		} catch (Exception e) {
@@ -1038,7 +1070,7 @@ public class TestSDKApplication {
 					.setWebhookUri("https://webhook.site/8b3911e1-7d5d-42a0-9d8c-27e198e96070")
 					.setRedirectUri("https://www.bbc.co.uk").setMetadata(metadata).setProviderId("xs2a-redsys-banco-santander")
 					.setPayerIban("GB13ABBY09012706978360").setPayerName("Paul McCartney")
-					.setBeneficiaryName("Tesco LTD").build();
+					.setBeneficiaryName("Paul McCartney").build();
 
 			return PaymentService.createOpenBankingEur(profileId, paymentOpenBankingEurCreate);
 		} catch (Exception e) {
@@ -1130,6 +1162,51 @@ public class TestSDKApplication {
 					.setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
 
 			return PaymentService.create(profileId, paymentFundingSourceToPayeeCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Create an open banking mandate for a profile.
+	private static OpenBankingMandateResponse createOpenBankingMandate(UUID profileId) {
+		try {
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+			LocalDate today = LocalDate.now();
+			LocalDate nextYear = today.plusYears(1);
+
+			OpenBankingMandateCreate openBankingMandateCreate = new OpenBankingMandateBuilder()
+					.setProviderId("ob-natwest-vrp-sandbox").setCountry("GB").setCurrency(Currency.GBP)
+					.setPayerName("Paul McCartney").setPayerEmail("paulmccartney@music.com")
+					.setBeneficiaryName("Paul McCartney").setMaximumIndividualAmount(100000).setMaximumPaymentAmount(1200000)
+					.setMaximumPaymentPeriod(OpenBankingMandatePeriod.Yearly).setReference("Rent for Flat 1")
+					.setRedirectUrl("https://www.bbc.co.uk").setValidFromDate(today.toString())
+					.setValidToDate(nextYear.toString()).build();
+
+			return OpenBankingMandateService.createOpenBankingMandate(profileId, openBankingMandateCreate);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Create an open banking mandate payment to a profile.
+	private static PaymentOpenBanking createOpenBankingMandatePayment(UUID profileId, UUID mandateId) {
+		try {
+			// Create some metadata (optional)
+			JsonNode metadata = JsonHelper.createEmptyObjectNode();
+			JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
+
+			PaymentOpenBankingMandateCreate paymentOpenBankingMandateCreate = new PaymentOpenBankingMandateBuilder()
+					.setAmount(100).setDescription("Deposit for Flat 1").setCurrency(Currency.GBP)
+					.setMetadata(metadata).setBeneficiaryName("Paul McCartney").setMandateId(mandateId).build();
+
+			return PaymentService.createOpenBankingGbp(profileId, paymentOpenBankingMandateCreate);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return null;
@@ -1281,33 +1358,65 @@ public class TestSDKApplication {
 	}
 
 
-	// Get the list of non-processing dates with a funding source ID and payee ID
-	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate, UUID fundingSourceId, UUID payeeId) {
-		try {
-			return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate, fundingSourceId, payeeId);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
-	// Get the list of non-processing dates with a funding source type and payee type
-	private static NonProcessingDates getNonProcessingDates(LocalDate intervalStartDate, LocalDate intervalEndDate,
-															FundingSourceType fundingSourceType, PayeeType payeeType) {
-		try {
-			return PaymentService.getNonProcessingDates(intervalStartDate, intervalEndDate, fundingSourceType, payeeType);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			return null;
-		}
-	}
-
-
 	// Delete a payment (should return status code 204)
 	private static int deletePayment(UUID profileId, UUID paymentId) {
 		try {
 			return PaymentService.delete(profileId, paymentId);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return 500;
+		}
+	}
+
+
+	// Get open banking mandate providers (GB and GBP only)
+	private static OpenBankingMandateProviderPage getOpenBankingMandateProviders() {
+		try {
+			return OpenBankingMandateService.getOpenBankingMandateProviders();
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Get all open banking mandates for a profile
+	private static OpenBankingMandatePage getOpenBankingMandates(UUID profileId) {
+		try {
+			return OpenBankingMandateService.getAll(profileId);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Get a page of open banking mandates for a profile
+	private static OpenBankingMandatePage getOpenBankingMandatePage(UUID profileId, int pageNum, int pageSize) {
+		try {
+			return OpenBankingMandateService.getPage(profileId, pageNum, pageSize);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Get an open banking mandate belonging to a profile
+	private static OpenBankingMandate getOpenBankingMandate(UUID profileId, UUID mandateId) {
+		try {
+			return OpenBankingMandateService.get(profileId, mandateId);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Delete an open banking mandate (should return status code 204)
+	private static int deleteOpenBankingMandate(UUID profileId, UUID mandateId) {
+		try {
+			return OpenBankingMandateService.delete(profileId, mandateId);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return 500;

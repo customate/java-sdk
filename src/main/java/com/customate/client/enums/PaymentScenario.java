@@ -29,6 +29,7 @@ public enum PaymentScenario {
     IncomingFee("IncomingFee"),
     IncomingTax("IncomingTax"),
     OpenBankingToWallet("OpenBankingToWallet"),
+    OpenBankingMandateToWallet("OpenBankingMandateToWallet"),
     CurrencyExchangeFeeAndTax("CurrencyExchangeFeeAndTax"),
     OutgoingExchangeFromInitiator("OutgoingExchangeFromInitiator"), // Initiator sells currency A
     IncomingExchangeToCounterparty("IncomingExchangeToCounterparty"), // Counterparty receives currency A

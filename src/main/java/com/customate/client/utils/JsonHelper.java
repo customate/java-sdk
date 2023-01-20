@@ -284,7 +284,7 @@ public class JsonHelper {
         while (fieldNames.hasNext()) {
             String fieldName = fieldNames.next();
             JsonNode jsonNode = mainNode.get(fieldName);
-            // if field exists and is an embedded object
+            // If field exists and is an embedded object
             if (jsonNode != null && jsonNode.isObject()) {
                 merge(jsonNode, updateNode.get(fieldName));
             } else {
