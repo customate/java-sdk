@@ -2,6 +2,7 @@ package com.customate.client;
 
 import com.customate.client.builders.*;
 import com.customate.client.enums.*;
+import com.customate.client.enums.Currency;
 import com.customate.client.models.*;
 import com.customate.client.services.*;
 import com.customate.client.utils.JsonHelper;
@@ -14,9 +15,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.Date;
-import java.util.Random;
-import java.util.UUID;
 
 /**
  * Tests all the endpoints in the Customate Java SDK.
@@ -32,12 +32,12 @@ import java.util.UUID;
  * Time: 1:46 PM
  *
  * @author Sav Balac
- * @version 1.3
+ * @version 1.4
  */
 @SpringBootApplication
-public class TestSDKApplicationOriginal {
+public class TestSDKApplication {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplicationOriginal.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestSDKApplication.class);
 
 	// Tests all the endpoints
 	public static void main(String[] args) {
@@ -71,7 +71,7 @@ public class TestSDKApplicationOriginal {
 			LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("johnlennon520590@music.com", "+447773200590");
+			Profile profile = createProfile("johnlennon520601@music.com", "+447773200601");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -83,7 +83,7 @@ public class TestSDKApplicationOriginal {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney457@music.com", "+447773200457");
+			Profile profile2 = createProfile("paulmccartney468@music.com", "+447773200468");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -113,6 +113,12 @@ public class TestSDKApplicationOriginal {
 			// Get a page of wallets
 			WalletPage walletPage = getWalletPage(profile.getId(), 1, 1);
 			LOGGER.info("Page 1 with 1 wallet per page for profile, ID: " + profile.getId() + "\n" + walletPage.asJson() + "\n");
+
+			// Get all wallets (balances) for this client, with pagination and totals, for the specified currency and date (start of day)
+			// There is no limit to the page size, so you can get all wallets in one call
+			Date now = new Date();
+			AllWalletPage allWalletPage = getAllWalletPage(Currency.GBP, now, 1, 1000);
+			LOGGER.info("Page 1 with 1000 wallets per page for this client" + "\n" + allWalletPage.asJson() + "\n");
 
 			// Create a direct debit funding source for the profile
 			FundingSource fundingSource = createDirectDebitFundingSource(profile.getId());
@@ -238,6 +244,13 @@ public class TestSDKApplicationOriginal {
 			PaymentOpenBanking mandatePayment = createOpenBankingMandatePayment(profile.getId(), newMandate.getId());
 			LOGGER.info("New mandate payment, for profile, ID: " + profile.getId() + "\n" + mandatePayment.asJson() + "\n");
 
+			// Wait two minutes for the mandate payment to process
+			try {
+				Thread.sleep(120000); // 120 seconds
+			} catch (InterruptedException e) {
+				LOGGER.error("InterruptedException: " + e.getMessage());
+			}
+
 			// Delete the mandate
 			int statusCode = deleteOpenBankingMandate(profile.getId(), newMandate.getId());
 			LOGGER.info("Deleted open banking mandate, ID: " + newMandate.getId() + " from profile, ID: " +
@@ -280,9 +293,25 @@ public class TestSDKApplicationOriginal {
 			PaymentPage payments = getPayments(profile.getId());
 			LOGGER.info("Payments for profile, ID: " + profile.getId() + "\n" + payments.asJson() + "\n");
 
+			// Get all payments for the profile, filtered and sorted
+			Date date = new Date();
+			String startOfToday = new SimpleDateFormat("yyyy-MM-dd").format(date);
+			Map<String, String> filters = new HashMap<String, String>();
+			filters.put("status.exact", "success");
+			filters.put("scenario.in", "OpenBankingToWallet,OpenBankingMandateToWallet");
+			filters.put("creation_date.after", startOfToday);
+			String sortField = "creation_date";
+			PaymentPage filteredPayments = getPayments(profile.getId(), filters, sortField, SortOrder.desc);
+			LOGGER.info("Success OpenBankingToWallet and OpenBankingMandateToWallet payments completed after 2023-03-17 for profile, ID: " +
+					profile.getId() + "\n" + filteredPayments.asJson() + "\n");
+
 			// Get a page of payments for the profile
 			PaymentPage paymentPage = getPaymentPage(profile.getId(), 1, 3);
 			LOGGER.info("Page 1 with 3 payments for profile, ID: " + profile.getId() + "\n" + paymentPage.asJson() + "\n");
+
+			// Get a page of payments for the profile, filtered and sorted
+			PaymentPage filteredPaymentPage = getPaymentPage(profile.getId(), filters, sortField, SortOrder.desc, 1, 3);
+			LOGGER.info("Page 1 with 3 filtered payments for profile, ID: " + profile.getId() + "\n" + filteredPaymentPage.asJson() + "\n");
 
 			// Get the wallet to bank account payment
 			Payment payment = getPayment(profile.getId(), walletToBankAccountPayment.getId());
@@ -326,9 +355,22 @@ public class TestSDKApplicationOriginal {
 			TransactionPage transactions = getTransactions(profile.getId());
 			LOGGER.info("Transactions for profile, ID: " + profile.getId() + "\n" + transactions.asJson() + "\n");
 
+			// Get all transactions for the profile, filtered and sorted
+			Map<String, String> transactionFilters = new HashMap<String, String>();
+			transactionFilters.put("status.exact", "success");
+			transactionFilters.put("name.in", "OpenBankingToWallet,OpenBankingMandateToWallet");
+			transactionFilters.put("completion_date.after", startOfToday);
+			TransactionPage filteredTransactions = getTransactions(profile.getId(), transactionFilters, "creation_date", SortOrder.desc);
+			LOGGER.info("Success OpenBankingToWallet and OpenBankingMandateToWallet transactions completed after 2023-03-17 for profile, ID: " +
+					profile.getId() + "\n" + filteredTransactions.asJson() + "\n");
+
 			// Get a page of transactions
-			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 25);
-			LOGGER.info("Page 1 with 3 transaction for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
+			TransactionPage transactionPage = getTransactionPage(profile.getId(), 1, 3);
+			LOGGER.info("Page 1 with 3 transactions for profile, ID: " + profile.getId() + "\n" + transactionPage.asJson() + "\n");
+
+			// Get a page of transactions, filtered and sorted
+			TransactionPage filteredTransactionPage = getTransactionPage(profile.getId(), transactionFilters, "creation_date", SortOrder.desc, 1, 3);
+			LOGGER.info("Page 1 with 3 filtered transactions for profile, ID: " + profile.getId() + "\n" + filteredTransactionPage.asJson() + "\n");
 
 			// Get a transaction
 			if (transactionPage.getItems().size() > 0) {
@@ -594,6 +636,18 @@ public class TestSDKApplicationOriginal {
 	private static WalletPage getWalletPage(UUID profileId, int pageNum, int pageSize) {
 		try {
 			return WalletService.getPage(profileId, pageNum, pageSize);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Gets all wallets for the client - balances, pagination and totals, for the currency and date (start of day)
+	// There is no limit to the page size, so you can get all wallets in one call
+	private static AllWalletPage getAllWalletPage(Currency currency, Date date, int pageNum, int pageSize) {
+		try {
+			return WalletService.getAllWallets(currency, date, pageNum, pageSize);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return null;
@@ -1299,6 +1353,7 @@ public class TestSDKApplicationOriginal {
 		}
 	}
 
+
 	// Get all payments for a profile
 	private static PaymentPage getPayments(UUID profileId) {
 		try {
@@ -1310,10 +1365,33 @@ public class TestSDKApplicationOriginal {
 	}
 
 
+	// Get all payments for a profile, using a map of filters and a sort field & sort order (asc or desc)
+	private static PaymentPage getPayments(UUID profileId, Map<String, String> filters, String sortField, SortOrder sortOrder) {
+		try {
+			return PaymentService.getAll(profileId, filters, sortField, sortOrder);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
 	// Get a page of payments for a profile
 	private static PaymentPage getPaymentPage(UUID profileId, int pageNum, int pageSize) {
 		try {
 			return PaymentService.getPage(profileId, pageNum, pageSize);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Get a page of payments for a profile, using a map of filters and a sort field & sort order (asc or desc)
+	private static PaymentPage getPaymentPage(UUID profileId, Map<String, String> filters,
+											  String sortField, SortOrder sortOrder, int pageNum, int pageSize) {
+		try {
+			return PaymentService.getPage(profileId, filters, sortField, sortOrder, pageNum, pageSize);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return null;
@@ -1435,10 +1513,33 @@ public class TestSDKApplicationOriginal {
 	}
 
 
+	// Get all transactions for a profile, using a map of filters and a sort field & sort order (asc or desc)
+	private static TransactionPage getTransactions(UUID profileId, Map<String, String> filters, String sortField, SortOrder sortOrder) {
+		try {
+			return TransactionService.getAll(profileId, filters, sortField, sortOrder);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
 	// Get a page of transactions for a profile
 	private static TransactionPage getTransactionPage(UUID profileId, int pageNum, int pageSize) {
 		try {
 			return TransactionService.getPage(profileId, pageNum, pageSize);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Get a page of transactions for a profile, using a map of filters and a sort field & sort order (asc or desc)
+	private static TransactionPage getTransactionPage(UUID profileId, Map<String, String> filters,
+													  String sortField, SortOrder sortOrder, int pageNum, int pageSize) {
+		try {
+			return TransactionService.getPage(profileId, filters, sortField, sortOrder, pageNum, pageSize);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return null;

@@ -2,14 +2,17 @@ package com.customate.client.services;
 
 import com.customate.client.CustomateClient;
 import com.customate.client.enums.Currency;
+import com.customate.client.enums.SortOrder;
 import com.customate.client.exceptions.ApiException;
 import com.customate.client.models.*;
+import com.customate.client.utils.UrlHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -41,6 +44,31 @@ public class PaymentService {
     }
 
     /**
+     * Gets filtered and sorted payments for a profile.
+     *
+     * @param profileId  Profile ID.
+     * @param filters  Map of filter keys and values.
+     * @param sortField  Field to sort on.
+     * @param sortOrder  Sort order: asc or desc.
+     * @return PaymentPage  A page of payments.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static PaymentPage getAll(UUID profileId, Map<String, String> filters, String sortField, SortOrder sortOrder)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+
+        // Build the query string
+        String queryString = UrlHelper.createQueryString(filters, sortField, sortOrder);
+
+        HttpResponse<String> response = CustomateClient.get("profiles/" + profileId + "/payments" + queryString);
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, PaymentPage.class);
+    }
+
+    /**
      * Gets a page of payments for a profile.
      *
      * @param profileId  Profile ID.
@@ -55,6 +83,34 @@ public class PaymentService {
     public static PaymentPage getPage(UUID profileId, int pageNum, int pageSize)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
         HttpResponse<String> response = CustomateClient.get("profiles/" + profileId + "/payments?page[number]=" + pageNum + "&page[size]=" + pageSize);
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, PaymentPage.class);
+    }
+
+    /**
+     * Gets a page of filtered and sorted payments for a profile.
+     *
+     * @param profileId  Profile ID.
+     * @param filters  Map of filter keys and values.
+     * @param sortField  Field to sort on.
+     * @param sortOrder  Sort order: asc or desc.
+     * @param pageNum  The page number (the first page is page 1).
+     * @param pageSize  The page size.
+     * @return PaymentPage  A page of payments.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static PaymentPage getPage(UUID profileId, Map<String, String> filters,
+                                      String sortField, SortOrder sortOrder, int pageNum, int pageSize)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+
+        // Build the query string
+        String queryString = UrlHelper.createQueryString(filters, sortField, sortOrder);
+
+        HttpResponse<String> response = CustomateClient.get("profiles/" + profileId + "/payments" + queryString + "&page[number]=" + pageNum + "&page[size]=" + pageSize);
         String responseBody = response.body();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(responseBody, PaymentPage.class);
