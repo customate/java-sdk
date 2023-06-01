@@ -23,7 +23,7 @@ import java.util.Date;
  *
  * Method createGbpOpenBankingPayment() loads funds into a user's wallet and requires user intervention:
  * Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment.
- * You have 3 minutes to do this (configurable below). The other payments rely on funds being available.
+ * You have 2 minutes to do this (configurable below). The other payments rely on funds being available.
  *
  * Similarly, createOpenBankingMandatePayment() relies on the user to authorise the mandate.
  * Paste the URI into a browser, enter customer number 123456789012, PIN 572, password 436 and confirm the mandate.
@@ -32,7 +32,7 @@ import java.util.Date;
  * Time: 1:46 PM
  *
  * @author Sav Balac
- * @version 1.4
+ * @version 1.5
  */
 @SpringBootApplication
 public class TestSDKApplication {
@@ -71,7 +71,7 @@ public class TestSDKApplication {
             LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
 
             // Create a profile - emails and phone number must be unique in the database
-            Profile profile = createProfile("johnlennon520601@music.com", "+447773200601");
+            Profile profile = createProfile("johnlennon520606@music.com", "+447773200606");
             LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
             // Force-verify the profile
@@ -83,7 +83,7 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney468@music.com", "+447773200468");
+			Profile profile2 = createProfile("paulmccartney473@music.com", "+447773200473");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
@@ -119,29 +119,6 @@ public class TestSDKApplication {
             Date now = new Date();
             AllWalletPage allWalletPage = getAllWalletPage(Currency.GBP, now, 1, 1000);
             LOGGER.info("Page 1 with 1000 wallets per page for this client" + "\n" + allWalletPage.asJson() + "\n");
-
-			// Create a direct debit funding source for the profile
-			FundingSource fundingSource = createDirectDebitFundingSource(profile.getId());
-			LOGGER.info("Create direct debit funding source for profile, ID: " + profile.getId() + "\n" + fundingSource.asJson() + "\n");
-
-			// Get the newly-created funding source
-			FundingSource fundingSource1 = getFundingSource(profile.getId(), fundingSource.getId());
-			LOGGER.info("Get funding source, ID: " + fundingSource1.getId() + " for profile, ID: " +
-					profile.getId() + "\n" + fundingSource1.asJson() + "\n");
-
-			// Update the funding source
-			FundingSource fundingSource2 = updateFundingSource(profile.getId(), fundingSource1.getId());
-			LOGGER.info("Funding source, updated to: " + fundingSource2.getTitle() + ", ID: " + fundingSource1.getId() +
-					" for profile, ID: " + profile.getId() + "\n" + fundingSource2.asJson() + "\n");
-
-			// Validate the funding source (will fail as the data is not real)
-            //FundingSource fundingSource3 = validateFundingSource(profile.getId(), fundingSource1.getId());
-            //LOGGER.info("Funding source, validated: " + fundingSource3.getTitle() + ", ID: " + fundingSource1.getId() +
-            //        " for profile, ID: " + profile.getId() + "\n" + fundingSource3.asJson() + "\n");
-
-			// Create another (direct debit) funding source for the profile, using the generic create funding source method
-			FundingSource fundingSourceDD = createFundingSource(profile.getId());
-			LOGGER.info("Create funding source (using the generic create method) for profile, ID: " + profile.getId() + "\n" + fundingSourceDD.asJson() + "\n");
 
 			// Get the funding sources for the profile
 			FundingSourcePage fundingSources = getFundingSources(profile.getId());
@@ -186,18 +163,18 @@ public class TestSDKApplication {
 			// Create a GBP open banking payment to load funds into the profile
 			PaymentOpenBanking paymentOpenBankingGbp = createGbpOpenBankingPayment(profile.getId());
 			LOGGER.info("GBP open banking to wallet payment for profile, ID: " + profile.getId() + "\n" + paymentOpenBankingGbp.asJson() + "\n");
-			LOGGER.info("Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment. YOU HAVE 3 MINUTES!\n");
+			LOGGER.info("Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment. YOU HAVE 2 MINUTES!\n");
 
             // Create a GBP open banking payment to load funds into profile 2
             PaymentOpenBanking paymentOpenBankingGbp2 = createGbpOpenBankingPayment(profile2.getId());
             LOGGER.info("GBP open banking to wallet payment for profile, ID: " + profile2.getId() + "\n" + paymentOpenBankingGbp2.asJson() + "\n");
-            LOGGER.info("Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment. YOU HAVE 3 MINUTES!\n");
+            LOGGER.info("Paste the URI into a browser, enter username: test_executed and any PIN and confirm the payment. YOU HAVE 2 MINUTES!\n");
 
 			// To complete the open banking payments, user intervention is required, i.e. paste the auth_uri into a browser.
 			// The following payments expect profile 1 to have funds in their GBP wallet.
-			// Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE PAYMENTS!
+			// Only the live system transfers real funds.  YOU HAVE 2 MINUTES TO CONFIRM THE PAYMENTS!
 			try {
-				Thread.sleep(180000); // 180 seconds
+				Thread.sleep(120000); // 120 seconds
 			} catch (InterruptedException e) {
 				LOGGER.error("InterruptedException: " + e.getMessage());
 			}
@@ -217,13 +194,13 @@ public class TestSDKApplication {
             // Create a mandate
             OpenBankingMandateResponse newMandate = createOpenBankingMandate(profile.getId());
             LOGGER.info("New mandate, for profile, ID: " + profile.getId() + "\n" + newMandate.asJson() + "\n");
-            LOGGER.info("Paste the URI into a browser, enter customer number 123456789012, PIN 572, password 436 and confirm the mandate. YOU HAVE 3 MINUTES!\n");
+            LOGGER.info("Paste the URI into a browser, enter customer number 123456789012, PIN 572, password 436 and confirm the mandate. YOU HAVE 2 MINUTES!\n");
 
             // To authorise the open banking mandate (and to then make payments using that mandate),
             // user intervention is required, i.e. paste the uri into a browser.
-            // Only the live system transfers real funds.  YOU HAVE 3 MINUTES TO CONFIRM THE MANDATE!
+            // Only the live system transfers real funds.  YOU HAVE 2 MINUTES TO CONFIRM THE MANDATE!
             try {
-                Thread.sleep(180000); // 180 seconds
+                Thread.sleep(120000); // 120 seconds
             } catch (InterruptedException e) {
                 LOGGER.error("InterruptedException: " + e.getMessage());
             }
@@ -282,12 +259,6 @@ public class TestSDKApplication {
             // Create a wallet to wallet payment
             Payment walletToWalletPayment = createWalletToWalletPayment(profile.getId(), gbpPayeeIdProfile2);
             LOGGER.info("Wallet to wallet payment: " + "\n" + walletToWalletPayment.asJson() + "\n");
-
-			// Create a single direct debit to wallet payment, paying profile 2.
-			// The funding source must be of type direct debit and the payee must be of type wallet.
-            // This will fail as the funding source isn't valid yet.
-			//Payment directDebitToWalletPayment = createDirectDebitToWalletPayment(profile2.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
-			//LOGGER.info("Single direct debit to wallet payment paying profile 2, ID: " + profile2.getId() + "\n" + directDebitToWalletPayment.asJson() + "\n");
 
 			// Get all payments for the profile
 			PaymentPage payments = getPayments(profile.getId());
@@ -393,21 +364,13 @@ public class TestSDKApplication {
             P2PCurrencyExchangePage p2pCurrencyExchangePage = getP2PCurrencyExchangePage(profile.getId(), 1, 3);
             LOGGER.info("Page 1 with 3 P2P currency exchanges for profile, ID: " + profile.getId() + "\n" + p2pCurrencyExchangePage.asJson() + "\n");
 
-            // Get the latest currency exchange
-            int size = p2pCurrencyExchangePage.getItems().size();
-            if (size > 0) {
-                UUID currencyExchangeId = p2pCurrencyExchangePage.getItems().get(size-1).getId();
-                P2PCurrencyExchange latestP2PCurrencyExchange = getP2PCurrencyExchange(profile.getId(), currencyExchangeId);
-                LOGGER.info("Currency exchange for profile, ID: " + profile.getId() + "\n" + latestP2PCurrencyExchange.asJson() + "\n");
-            }
-
             // Currency exchange - this exchanges funds in one currency for another for the profile - get a quoted exchange rate
-            CurrencyExchange currencyExchange = getCurrencyExchangeQuote(profile.getId());
-            LOGGER.info("Currency exchange, including quote, for profile ID: " + profile.getId() + "\n" + currencyExchange.asJson() + "\n");
+            //CurrencyExchange currencyExchange = getCurrencyExchangeQuote(profile.getId());
+            //LOGGER.info("Currency exchange, including quote, for profile ID: " + profile.getId() + "\n" + currencyExchange.asJson() + "\n");
 
             // Currency exchange - execute the trade
-            CurrencyExchangeExecuteQuoteResponse exchangeRateResponse = executeCurrencyExchange(profile.getId(), currencyExchange.getId());
-            LOGGER.info("Executed currency exchange for profile, ID: " + profile.getId() + "\n" + exchangeRateResponse.asJson() + "\n");
+            //CurrencyExchangeExecuteQuoteResponse exchangeRateResponse = executeCurrencyExchange(profile.getId(), currencyExchange.getId());
+            //LOGGER.info("Executed currency exchange for profile, ID: " + profile.getId() + "\n" + exchangeRateResponse.asJson() + "\n");
 
             // Create a schedule, paying profile 2
 			Schedule schedule = createSchedule(profile.getId(), gbpFundingSourceId, gbpPayeeIdProfile2);
@@ -416,11 +379,6 @@ public class TestSDKApplication {
 			// Update the schedule, extending it by another week
 			Schedule schedule1 = updateSchedule(profile.getId(), schedule);
 			LOGGER.info("14 day schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + schedule1.asJson() + "\n");
-
-			// Create a direct debit to wallet schedule, paying profile 2
-            // Will fail as the funding source is not valid yet
-			//Schedule scheduleDD = createDirectDebitToWalletSchedule(profile.getId(), fundingSource.getId(), gbpPayeeIdProfile2);
-			//LOGGER.info("7 day DD schedule, profile 1 paying profile 2, £5 a day with a deposit of £1\n" + scheduleDD.asJson() + "\n");
 
 			// Get the schedules for the profile
 			SchedulePage schedules = getSchedules(profile.getId());
@@ -466,11 +424,6 @@ public class TestSDKApplication {
 			// Get all payments for the profile (after trying to delete the wallet to wallet payment)
 			PaymentPage payments2 = getPayments(profile.getId());
 			LOGGER.info("Payments for profile, ID: " + profile.getId() + "\n" + payments2.asJson() + "\n");
-
-			// Delete the funding source
-			statusCode = deleteFundingSource(profile.getId(), fundingSource.getId());
-			LOGGER.info("Delete funding source, ID: " + fundingSource.getId() + " from profile, ID: " +
-					profile.getId() + ", status code: " + statusCode + "\n");
 
 			// Delete the payee
 			statusCode = deletePayee(profile.getId(), bankAccountPayeeProfile2.getId());
@@ -731,34 +684,6 @@ public class TestSDKApplication {
     }
 
 
-    // Create a direct debit to wallet schedule for a profile.
-    // The funding source must be of type direct debit and the payee must be of type wallet.
-    private static Schedule createDirectDebitToWalletSchedule(UUID profileId, UUID fundingSourceId, UUID payeeId) {
-        try {
-            // Create some metadata (optional)
-            JsonNode metadata = JsonHelper.createEmptyObjectNode();
-            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-            // Append the datetime to the schedule to make it unique
-            Date date = new Date();
-            String today = new SimpleDateFormat("yyyy-MM-dd").format(date);
-            String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
-            String title = "Test Daily Direct Debit to Wallet Schedule " + now;
-
-            ScheduleDDToWalletCreate scheduleDDToWalletCreate = new ScheduleDDToWalletBuilder().setTitle(title)
-                    .setSchedulePurpose(SchedulePurpose.pay).setSchedulePeriod(SchedulePeriod.daily).setNumberOfPayments(7)
-                    .setRegularPaymentStartDate(today).setRegularPaymentAmount(500).setDepositPaymentDate(today)
-                    .setDepositPaymentAmount(100).setDescription("7 day DD to wallet schedule paying £5 a day with a deposit of £1")
-                    .setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
-
-            return ScheduleService.createDirectDebitToWallet(profileId, scheduleDDToWalletCreate);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
-
-
     // Pay overdue payments for a schedule
     private static int payOverduePayments(UUID profileId, Schedule schedule) {
         try {
@@ -803,123 +728,10 @@ public class TestSDKApplication {
     }
 
 
-    // Create a funding source for a profile
-    private static FundingSource createFundingSource(UUID profileId) {
-        try {
-            FundingSourcePayer fundingSourceCreatePayer = new FundingSourcePayerBuilder().setFullName("Jack Smith").build();
-
-            FundingSourceAccount fundingSourceAccount =
-                    new FundingSourceAccountBuilder().setSortCode("040004").setAccountNumber("37618166").build();
-
-            FundingSourceCreateData fundingSourceCreateData = new FundingSourceDataBuilder()
-                    .setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourceCreatePayer)
-                    .setFundingSourceAccount(fundingSourceAccount).build();
-
-            // Create a new title (must be unique)
-            UUID uuid = UUID.randomUUID();
-            String newTitle = "Direct Debit Source " + uuid;
-
-            FundingSourceCreate fundingSourceCreate =
-                    new FundingSourceBuilder().setTitle(newTitle)
-                            .setCurrency(Currency.GBP).setFundingSourceType(FundingSourceType.direct_debit)
-                            .setFundingSourceCreateData(fundingSourceCreateData).build();
-
-            return FundingSourceService.create(profileId, fundingSourceCreate);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
-
-
-    // Create a direct debit funding source for a profile
-    private static FundingSource createDirectDebitFundingSource(UUID profileId) {
-        try {
-            FundingSourcePayer fundingSourceCreatePayer = new FundingSourcePayerBuilder().setFullName("Tom Jones").build();
-
-            FundingSourceAccount fundingSourceAccount =
-                    new FundingSourceAccountBuilder().setSortCode("090129").setAccountNumber("07978459").build();
-
-            FundingSourceCreateData fundingSourceCreateData = new FundingSourceDataBuilder()
-                    .setFundingSourceOwnership(FundingSourceOwnership.single).setFundingSourcePayer(fundingSourceCreatePayer)
-                    .setFundingSourceAccount(fundingSourceAccount).build();
-
-            FundingSourceDDCreate fundingSourceDDCreate =
-                    new FundingSourceDDBuilder().setTitle("Direct Debit Source 2")
-                            .setCurrency(Currency.GBP).setFundingSourceCreateData(fundingSourceCreateData).build();
-
-            return FundingSourceService.createDirectDebit(profileId, fundingSourceDDCreate);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
-
-
     // Get a funding source
     private static FundingSource getFundingSource(UUID profileId, UUID fundingSourceId) {
         try {
             return FundingSourceService.get(profileId, fundingSourceId);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
-
-
-    // Update a funding source with a new title and new payer's email and address
-    private static FundingSource updateFundingSource(UUID profileId, UUID fundingSourceId) {
-        try {
-            // Create a new title (must be unique)
-            UUID uuid = UUID.randomUUID();
-            String newTitle = "Direct Debit Source " + uuid;
-
-            // Create a funding source address
-            FundingSourceAddress fundingSourceAddress = new FundingSourceAddressBuilder()
-                    .setAddressLine1("4 Privet Drive").setAddressLine2("Little Whinging")
-                    .setAddressLine3("Big Whinging").setCity("Muggle City").setLocality("Surrey")
-                    .setPostcode("MC1 1AA").setCountry("GB").build();
-
-            // Create a payer
-            FundingSourceUpdatePayer fundingSourceUpdatePayer =
-                    new FundingSourcePayerUpdateBuilder()
-                            .setEmail("updated-" + uuid + "@email.com").setFundingSourceAddress(fundingSourceAddress).build();
-
-            // Create a funding source (for update)
-            FundingSourceUpdate fundingSourceUpdate = new FundingSourceUpdateBuilder().setTitle(newTitle)
-                    .setFundingSourceUpdatePayer(fundingSourceUpdatePayer).build();
-
-            return FundingSourceService.update(profileId, fundingSourceId, fundingSourceUpdate);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
-
-
-    // Validate a funding source with a new title and new payer's name, date of birth, email and address
-    private static FundingSource validateFundingSource(UUID profileId, UUID fundingSourceId) {
-        try {
-            // Create a new title (must be unique)
-            UUID uuid = UUID.randomUUID();
-            String newTitle = "Funding Source " + uuid;
-
-            // Create a funding source address
-            FundingSourceAddress fundingSourceAddress = new FundingSourceAddressBuilder()
-                    .setAddressLine1("5 Privet Drive").setAddressLine2("Little Whinging")
-                    .setAddressLine3("Big Whinging").setCity("Muggle City").setLocality("Surrey")
-                    .setPostcode("MC1 1AA").setCountry("GB").build();
-
-            // Create a payer to validate
-            FundingSourceValidatePayer fundingSourceValidatePayer =
-                    new FundingSourcePayerValidateBuilder().setFirstName("Mickey").setLastName("Mouse").setBirthDate("1920-05-16")
-                            .setEmail("updated-" + uuid + "@email.com").setFundingSourceAddress(fundingSourceAddress).build();
-
-            // Create a funding source (for validation)
-            FundingSourceValidate fundingSourceValidate = new FundingSourceValidateBuilder().setTitle(newTitle)
-                    .setFundingSourceValidatePayer(fundingSourceValidatePayer).build();
-
-            return FundingSourceService.validate(profileId, fundingSourceId, fundingSourceValidate);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return null;
@@ -988,7 +800,7 @@ public class TestSDKApplication {
             String randSortCode = "" + rand.nextInt(100000);
             String randAccountNumber = "" + rand.nextInt(10000000);
 
-            PayeeAccount payeeAccount = new PayeeAccountBuilder().setIban("SAPYGB2L400000537618168")
+            PayeeAccount payeeAccount = new PayeeAccountBuilder()
                     .setSortCode(randSortCode).setAccountNumber(randAccountNumber).build();
 
             // Create payee data (for the payee)
@@ -1171,29 +983,6 @@ public class TestSDKApplication {
                     .setCurrency(Currency.GBP).setMetadata(metadata).setPayeeId(payeeId).build();
 
             return PaymentService.createWalletToWallet(profileId, paymentWalletToPayeeCreate);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        }
-    }
-
-
-    // Create a single direct debit to wallet payment from the profile to the payee.
-    // The funding source must be of type direct debit and the payee must be of type wallet.
-    private static Payment createDirectDebitToWalletPayment(UUID profileId, UUID fundingSourceId, UUID payeeId) {
-        try {
-            // Create some metadata (optional)
-            JsonNode metadata = JsonHelper.createEmptyObjectNode();
-            JsonHelper.addStringField(metadata, "sample_client_id", "123456789");
-
-            Date date = new Date();
-            String now = new SimpleDateFormat("yyyy-MM-dd").format(date);
-
-            PaymentFundingSourceToPayeeCreate paymentFundingSourceToPayeeCreate = new PaymentFundingSourceToPayeeBuilder()
-                    .setAmount(1000).setDescription("Single Direct Debit to wallet").setExecutionDate(now)
-                    .setCurrency(Currency.GBP).setMetadata(metadata).setFundingSourceId(fundingSourceId).setPayeeId(payeeId).build();
-
-            return PaymentService.createDirectDebitToWallet(profileId, paymentFundingSourceToPayeeCreate);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return null;
