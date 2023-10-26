@@ -32,7 +32,7 @@ import java.util.Date;
  * Time: 1:46 PM
  *
  * @author Sav Balac
- * @version 1.5
+ * @version 1.6
  */
 @SpringBootApplication
 public class TestSDKApplication {
@@ -71,7 +71,7 @@ public class TestSDKApplication {
 			LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
 
 			// Create a profile - emails and phone number must be unique in the database
-			Profile profile = createProfile("johnlennon520606@music.com", "+447773200606");
+			Profile profile = createProfile("johnlennon520613@music.com", "+447773200613");
 			LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
 			// Force-verify the profile
@@ -83,12 +83,12 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney473@music.com", "+447773200473");
+			Profile profile2 = createProfile("paulmccartney480@music.com", "+447773200480");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
-			//VerificationResponse verificationResponse2 = verifyProfile(profile2);
-			//LOGGER.info("Verify profile 2\n" + verificationResponse2.asJson() + "\n");
+			VerificationResponse verificationResponse2 = verifyProfile(profile2);
+			LOGGER.info("Verify profile 2\n" + verificationResponse2.asJson() + "\n");
 
 			// Force-verify the second profile
 			VerificationResponse verificationResponse3 = forceVerifyProfile(profile2);
@@ -436,6 +436,22 @@ public class TestSDKApplication {
 
 			statusCode = deleteProfile(profile2.getId());
 			LOGGER.info("Delete profile, ID: " + profile2.getId() + ", status code: " + statusCode + "\n");
+
+			// Verify a person who doesn't have a profile - will fail as the data is not correct
+			VerificationNoProfileResponse verificationNoProfileResponseFail = verifyNoProfileFail();
+			LOGGER.info("Verify person - should fail\n" + verificationNoProfileResponseFail.asJson() + "\n");
+
+			// Verify a person who doesn't have a profile - will fail as I don't know the correct data
+			VerificationNoProfileResponse verificationNoProfileResponsePass = verifyNoProfilePass();
+			LOGGER.info("Verify person - should fail, as the data is not real\n" + verificationNoProfileResponsePass.asJson() + "\n");
+
+			// Verify a person in the politically-exposed persons and sanctions list - should fail (Vladimir Putin)
+			VerificationNoProfileResponse verificationPepSanctionsResponseFail = verifyPepSanctionsNoProfileFail();
+			LOGGER.info("Verify person (PEP & Sanctions) - should fail\n" + verificationPepSanctionsResponseFail.asJson() + "\n");
+
+			// Verify a person in the politically-exposed persons and sanctions list - should pass (Rishi Sunak's wife)
+			VerificationNoProfileResponse verificationPepSanctionsResponsePass = verifyPepSanctionsNoProfilePass();
+			LOGGER.info("Verify person (PEP & Sanctions) - should pass\n" + verificationPepSanctionsResponsePass.asJson() + "\n");
 
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception: " + e.getMessage());
@@ -1410,6 +1426,114 @@ public class TestSDKApplication {
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			return 500;
+		}
+	}
+
+
+	// Verify a person without a profile - will fail, as the data is not correct
+	private static VerificationNoProfileResponse verifyNoProfileFail() {
+		try {
+			// Create sub-objects
+			Address address = new AddressBuilder().setLine1("Westminster Cathedral").setLine2("Victoria Street")
+					.setLine3("Westminster").setCity("London").setLocality("Greater London").setPostcode("SW1P 1LT")
+					.setCountry("GB").build();
+
+			Passport passport = new PassportBuilder().setNumber("AA1234567890GBR1234567A1234567<<<<<<<<<<<<<<01")
+					.setExpiryDate("2031-09-23").setOriginCountry("GB").build();
+
+			DriverLicence driverLicence = new DriverLicenceBuilder().setNumber("EUEGE123456BM9NM")
+					.setPostcode("B126DY").setIssueDate("2011-10-27").build();
+
+			IdentityCard identityCard = new IdentityCardBuilder().setNumber("L01X00T47").setCountry("DE").build();
+
+			VerificationNoProfileRequest verificationNoProfileRequest = new VerificationNoProfileRequestBuilder()
+					.setFirstName("James").setMiddleName("Paul").setLastName("McCartney").setGender(Gender.female)
+					.setBirthDate("2023-01-01").setAddress(address).setDriverLicence(driverLicence)
+					.setPassport(passport).setIdentityCard(identityCard).setTaxIdNumber("12345678A").build();
+
+			return VerificationService.verifyNoProfile(verificationNoProfileRequest);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Verify a person without a profile - will fail, as I don't know the correct sub-object data
+	private static VerificationNoProfileResponse verifyNoProfilePass() {
+		try {
+			// Create sub-objects
+			Address address = new AddressBuilder().setLine1("10 Downing Street").setLine2("")
+					.setLine3("City of Westminster").setCity("London").setLocality("Greater London")
+					.setPostcode("SW1A 2AA").setCountry("GB").build();
+
+			Passport passport = new PassportBuilder().setNumber("AA1234567890GBR1234567A1234567<<<<<<<<<<<<<<01")
+					.setExpiryDate("2031-09-23").setOriginCountry("GB").build();
+
+			DriverLicence driverLicence = new DriverLicenceBuilder().setNumber("EUEGE123456BM9NM")
+					.setPostcode("B126DY").setIssueDate("2011-10-27").build();
+
+			IdentityCard identityCard = new IdentityCardBuilder().setNumber("L01X00T47").setCountry("DE").build();
+
+			VerificationNoProfileRequest verificationNoProfileRequest = new VerificationNoProfileRequestBuilder()
+					.setFirstName("Rishi").setMiddleName("").setLastName("Sunak").setGender(Gender.male)
+					.setBirthDate("1980-05-12").setAddress(address).setPassport(passport).setDriverLicence(driverLicence)
+					.setIdentityCard(identityCard).setTaxIdNumber("12345678A").build();
+
+			return VerificationService.verifyNoProfile(verificationNoProfileRequest);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Verify a person - politically-exposed persons & Sanctions only - will fail (Vladimir Putin)
+	private static VerificationNoProfileResponse verifyPepSanctionsNoProfileFail() {
+		try {
+			// Create sub-objects
+			Address address = new AddressBuilder().setLine1("Novo-Ogaryovo").setLine2("")
+					.setLine3("").setCity("Moscow").setLocality("Moscow").setPostcode("103132")
+					.setCountry("RU").build();
+
+			Passport passport = new PassportBuilder().setNumber("AA1234567890GBR1234567A1234567<<<<<<<<<<<<<<01")
+					.setExpiryDate("2031-09-23").setOriginCountry("GB").build();
+
+			VerificationPepSanctionsRequest verificationPepSanctionsRequestOrig = new VerificationPepSanctionsRequestBuilder()
+					.setFirstName("Vladimir").setMiddleName("Vladimirovich").setLastName("Putin")
+					.setBirthDate("1952-10-07").setAddress(address).setPassport(passport).build();
+
+			VerificationPepSanctionsRequest verificationPepSanctionsRequest = new VerificationPepSanctionsRequestBuilder()
+					.setFirstName("Vladimir").setMiddleName("Vladimirovich").setLastName("Putin")
+					.setBirthDate("1952-10-07").build();
+
+			return VerificationService.verifyPepSanctionsNoProfile(verificationPepSanctionsRequest);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
+		}
+	}
+
+
+	// Verify a person - politically-exposed persons & Sanctions only - should pass (Rishi Sunak's wife)
+	private static VerificationNoProfileResponse verifyPepSanctionsNoProfilePass() {
+		try {
+			// Create sub-objects
+			Address address = new AddressBuilder().setLine1("10 Downing Street").setLine2("")
+					.setLine3("City of Westminster").setCity("London").setLocality("Greater London")
+					.setPostcode("SW1A 2AA").setCountry("GB").build();
+
+			Passport passport = new PassportBuilder().setNumber("AA1234567890GBR1234567A1234567<<<<<<<<<<<<<<01")
+					.setExpiryDate("2031-09-23").setOriginCountry("GB").build();
+
+			VerificationPepSanctionsRequest verificationPepSanctionsRequest = new VerificationPepSanctionsRequestBuilder()
+					.setFirstName("Akshata").setMiddleName("Narayan").setLastName("Murty")
+					.setBirthDate("1980-04-25").build();
+
+			return VerificationService.verifyPepSanctionsNoProfile(verificationPepSanctionsRequest);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			return null;
 		}
 	}
 

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 /**
  * Models a profile verification (response).
  *
@@ -25,6 +27,10 @@ public class VerificationResponse extends BaseModel {
     private boolean isForced;
     @JsonProperty("status")
     private String status;
+    @JsonProperty("verification_id")
+    private String verificationId;
+    @JsonProperty("verification_failure_reasons")
+    private List<VerificationFailureReason> verificationFailureReasons;
 
     /**
      * Default constructor.
