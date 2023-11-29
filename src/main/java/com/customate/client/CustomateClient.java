@@ -61,7 +61,7 @@ public class CustomateClient {
     /**
      * Sends a GET request.
      *
-     * @param url  URL.
+     * @param url  URL, e.g. "profiles".
      * @return HttpResponse<String>  The HTTP response.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
@@ -84,8 +84,8 @@ public class CustomateClient {
     /**
      * Sends a POST request.
      *
-     * @param url  URL.
-     * @param bodyContent  The content of the body to be posted.
+     * @param url  URL, e.g. "profiles".
+     * @param bodyContent  The content of the body, as stringified JSON.
      * @return HttpResponse<String>  The HTTP response.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
@@ -94,8 +94,8 @@ public class CustomateClient {
      */
     public static HttpResponse<String> post(String url, String bodyContent)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
-        String contentHash = contentHash(bodyContent);
-        URI uri = new URI(getUrl(url));
+        String contentHash = contentHash(bodyContent); // e.g. "41859c831385ac1a76136a7411a7d1c4db8d89da"
+        URI uri = new URI(getUrl(url)); // e.g. https://sandbox-api.gocustomate.com/v1/profiles
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(uri)
                 .POST(HttpRequest.BodyPublishers.ofString(bodyContent));
         Optional<HttpResponse<String>> response = sendRequest(uri, "POST", requestBuilder, contentHash);
@@ -110,8 +110,8 @@ public class CustomateClient {
     /**
      * Sends a PUT request.
      *
-     * @param url  URL.
-     * @param bodyContent  The content of the body to be updated.
+     * @param url  URL, e.g. "profiles/92ac69be-8402-4dae-8d05-48fc30d661de".
+     * @param bodyContent  The content of the body, as stringified JSON.
      * @return HttpResponse<String>  The HTTP response.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
@@ -120,8 +120,8 @@ public class CustomateClient {
      */
     public static HttpResponse<String> put(String url, String bodyContent)
             throws URISyntaxException, IOException, InterruptedException, ApiException {
-        String contentHash = contentHash(bodyContent);
-        URI uri = new URI(getUrl(url));
+        String contentHash = contentHash(bodyContent); // e.g. "b00c131f698a290b8b448ecfb8dcb4b7f120a7eb"
+        URI uri = new URI(getUrl(url)); // e.g. https://sandbox-api.gocustomate.com/v1/profiles/92ac69be-8402-4dae-8d05-48fc30d661de"
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(uri)
                 .PUT(HttpRequest.BodyPublishers.ofString(bodyContent));
         Optional<HttpResponse<String>> response = sendRequest(uri, "PUT", requestBuilder, contentHash);
@@ -136,7 +136,7 @@ public class CustomateClient {
     /**
      * Sends a DELETE request.
      *
-     * @param url  URL.
+     * @param url  URL, e.g. "profiles/92ac69be-8402-4dae-8d05-48fc30d661de".
      * @return HttpResponse<String>  The HTTP response.
      * @throws URISyntaxException  If there was a problem creating the URI.
      * @throws IOException  If there was an IO error sending the request.
@@ -175,8 +175,8 @@ public class CustomateClient {
     /**
      * Gets the complete URL, including the base URL and version.
      *
-     * @param url  URL.
-     * @return String  The URL.
+     * @param url  URL, e.g. "profiles".
+     * @return String  The URL, e.g. "https://sandbox-api.gocustomate.com/v1/profiles".
      */
     private static String getUrl(String url) {
         return baseUrl + "/" + version +  "/" + url;
@@ -185,8 +185,8 @@ public class CustomateClient {
     /**
      * Hashes the body content using the SHA-1 algorithm.
      *
-     * @param bodyContent  The content to be hashed.
-     * @return String  The hashed content.
+     * @param bodyContent  The content, as stringified JSON, to be hashed.
+     * @return String  The hashed content, e.g. "41859c831385ac1a76136a7411a7d1c4db8d89da".
      */
     private static String contentHash(String bodyContent) {
         String contentHash = "";
@@ -212,23 +212,43 @@ public class CustomateClient {
     /**
      * Sends a request to the API.
      *
-     * @param uri  The URI endpoint.
-     * @param method  GET, POST, PUT or DELETE.
+     * @param uri  The URI, e.g. "https://sandbox-api.gocustomate.com/v1/profiles".
+     * @param method  "GET", "POST", "PUT", or "DELETE".
      * @param requestBuilder  The HTTP request builder.
-     * @param contentHash  The hashed content.
+     * @param contentHash  The hashed content, e.g. "41859c831385ac1a76136a7411a7d1c4db8d89da".
      * @return Optional<HttpResponse<String>>  The HTTP response.
      * @throws IOException  If there was an IO error sending the request.
      * @throws InterruptedException  If there was an interrupted exception sending the request.
      */
     private static Optional<HttpResponse<String>> sendRequest(URI uri, String method,
             HttpRequest.Builder requestBuilder, String contentHash) throws IOException, InterruptedException {
+
+        // Get a unique ID
+        // e.g. "8361eb9d-6a25-4fee-8606-524779550276"
         String UUIDString = getUUIDString();
+
+        // Get the current date
+        // e.g. "2023-11-29T17:08:30+0000"
         String dateString = getDate();
+
+        // Headers - string together the hashed content, date and UUID
+        // e.g. "paymentservice-contenthash:41859c831385ac1a76136a7411a7d1c4db8d89da\npaymentservice-date:2023-11-29T17:08:30+0000\npaymentservice-nonce:8361eb9d-6a25-4fee-8606-524779550276"
         String headersString = headersToString(contentHash, dateString, UUIDString);
+
+        // Set the content type (empty for GET and DELETE)
         String contentType = method.equals("POST") || method.equals("PUT") ? "application/json" : "";
+
+        // String together the method, URI, content type and headers
+        // e.g. "POST\n/v1/profiles\napplication/json\npaymentservice-contenthash:41859c831385ac1a76136a7411a7d1c4db8d89da\npaymentservice-date:2023-11-29T17:08:30+0000\npaymentservice-nonce:8361eb9d-6a25-4fee-8606-524779550276"
         String accessTokenString = accessTokenToString(method, uri.getPath(), contentType, headersString);
+
+        // Create an access token based on the above token string using the API secret
+        // e.g. "3BYRAXmNQpqeEd/NMkKdRIjSOOd1tYS3lG/vZm5pUB4="
         Optional<String> accessToken = createToken(apiSecret.getBytes(StandardCharsets.UTF_8),
                                                     accessTokenString.getBytes(StandardCharsets.UTF_8));
+
+        // Create the auth string, based on the API key and access token
+        // e.g. "Signature 6eaad275-ff1e-4cc9-a368-d130dbcae12f:3BYRAXmNQpqeEd/NMkKdRIjSOOd1tYS3lG/vZm5pUB4="
         String authorizationString = getAuthString(accessToken.get());
 
         HttpResponse<String> response = null;
@@ -238,7 +258,7 @@ public class CustomateClient {
             requestBuilder.header("paymentservice-date", dateString);
             requestBuilder.header("paymentservice-nonce", UUIDString);
 
-            if (!contentHash.isEmpty()) {
+            if (!contentHash.isEmpty()) { // There will be hashed content for POST and PUT (but an empty string for GET and DELETE)
                 requestBuilder.header("paymentservice-contenthash", contentHash);
                 requestBuilder.header("Content-Type", contentType);
             }
@@ -250,9 +270,9 @@ public class CustomateClient {
     }
 
     /**
-     * Creates a random, unique UUID (used when sending a request).
+     * Creates a random, unique UUID.
      *
-     * @return String  The UUID as a string.
+     * @return String  The UUID as a string, e.g. "8361eb9d-6a25-4fee-8606-524779550276".
      */
     private static String getUUIDString() {
         return UUID.randomUUID().toString();
@@ -261,7 +281,7 @@ public class CustomateClient {
     /**
     * Gets the current datetime as a string.
     *
-    * @return String  The current datetime as a string.
+    * @return String  The current datetime as a string, e.g. "2023-11-29T17:08:30+0000".
     */
     private static String getDate() {
         TimeZone timeZone = TimeZone.getDefault();
@@ -274,12 +294,12 @@ public class CustomateClient {
     }
 
     /**
-     * Converts headers to a string (used to create an access token string when sending a request).
+     * Converts headers to a string (from the hashed content, date and UUID).
      *
-     * @param contentHash  The hashed content.
-     * @param paymentServiceDateString  The current datetime.
-     * @param paymentServiceNonceString  A unique UUID.
-     * @return String  The headers as a string.
+     * @param contentHash  The hashed content, e.g. "41859c831385ac1a76136a7411a7d1c4db8d89da".
+     * @param paymentServiceDateString  The current datetime, e.g. "2023-11-29T17:08:30+0000".
+     * @param paymentServiceNonceString  A unique UUID, e.g. "8361eb9d-6a25-4fee-8606-524779550276".
+     * @return String  The headers as a string, e.g. "paymentservice-contenthash:41859c831385ac1a76136a7411a7d1c4db8d89da\npaymentservice-date:2023-11-29T17:08:30+0000\npaymentservice-nonce:8361eb9d-6a25-4fee-8606-524779550276".
      */
     private static String headersToString(String contentHash,
                                           String paymentServiceDateString, String paymentServiceNonceString) {
@@ -293,13 +313,13 @@ public class CustomateClient {
     }
 
     /**
-     * Creates an access token string (used to create a token when sending a request).
+     * Creates an access token string (combines the method, URI, content type and headers).
      *
-     * @param method  The HTTP method.
-     * @param path  The URI path.
-     * @param contentType  The content type (application/json for POST and PUT).
-     * @param headers  The headers a string.
-     * @return String  Access token.
+     * @param method  The HTTP method, e.g. "POST".
+     * @param path  The URI path, e.g. "/v1/profiles".
+     * @param contentType  The content type, "application/json" for POST and PUT, else "".
+     * @param headers  The headers a string, e.g. "paymentservice-contenthash:41859c831385ac1a76136a7411a7d1c4db8d89da\npaymentservice-date:2023-11-29T17:08:30+0000\npaymentservice-nonce:8361eb9d-6a25-4fee-8606-524779550276".
+     * @return String  Access token, e.g. "POST\n/v1/profiles\napplication/json\npaymentservice-contenthash:41859c831385ac1a76136a7411a7d1c4db8d89da\npaymentservice-date:2023-11-29T17:08:30+0000\npaymentservice-nonce:8361eb9d-6a25-4fee-8606-524779550276".
      */
     private static String accessTokenToString(String method, String path, String contentType, String headers) {
         return new StringBuilder(method)
@@ -307,11 +327,11 @@ public class CustomateClient {
     }
 
     /**
-     * Creates a token using HmacSHA256 (used to create an authorization string when sending a request).
+     * Creates a token, using HmacSHA256, from the API secret and access token.
      *
      * @param secret  The API secret as a byte array.
      * @param message  The access token string as a byte array.
-     * @return String  The token.
+     * @return String  The token, e.g. "3BYRAXmNQpqeEd/NMkKdRIjSOOd1tYS3lG/vZm5pUB4=".
      */
     private static Optional<String> createToken(byte[] secret, byte[] message) {
         String token = null;
@@ -328,10 +348,10 @@ public class CustomateClient {
     }
 
     /**
-     * Creates an authorization string from a token (used as the Authorization header in the request).
+     * Creates an authorization string, from the API key and token.
      *
-     * @param hashedString  The hashed token.
-     * @return String  The authorization string.
+     * @param hashedString  The hashed token, e.g. "3BYRAXmNQpqeEd/NMkKdRIjSOOd1tYS3lG/vZm5pUB4=".
+     * @return String  The authorization string, e.g. "Signature 6eaad275-ff1e-4cc9-a368-d130dbcae12f:3BYRAXmNQpqeEd/NMkKdRIjSOOd1tYS3lG/vZm5pUB4=".
      */
     private static String getAuthString(String hashedString) {
         return new StringBuilder("Signature ").append(apiKey).append(":").append(hashedString).toString();

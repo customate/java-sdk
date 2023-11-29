@@ -32,7 +32,7 @@ import java.util.Date;
  * Time: 1:46 PM
  *
  * @author Sav Balac
- * @version 1.6
+ * @version 1.7
  */
 @SpringBootApplication
 public class TestSDKApplication {
@@ -71,7 +71,7 @@ public class TestSDKApplication {
             LOGGER.info("Page 1 with 1 webhook per page\n" + webhookPage.asJson() + "\n");
 
             // Create a profile - emails and phone number must be unique in the database
-            Profile profile = createProfile("johnlennon520613@music.com", "+447773200613");
+            Profile profile = createProfile("johnlennon520615@music.com", "+447773200615");
             LOGGER.info("Create profile\n" + profile.asJson() + "\n");
 
             // Force-verify the profile
@@ -83,7 +83,7 @@ public class TestSDKApplication {
 			LOGGER.info("Get profile\n" + verifiedProfile.asJson() + "\n");
 
 			// Create a second profile - emails and phone number must be unique in the database
-			Profile profile2 = createProfile("paulmccartney480@music.com", "+447773200480");
+			Profile profile2 = createProfile("paulmccartney481@music.com", "+447773200481");
 			LOGGER.info("Create profile 2\n" + profile2.asJson() + "\n");
 
 			// Verify the second profile (this will fail as we're not using real data)
