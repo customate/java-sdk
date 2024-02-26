@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
+import java.util.UUID;
 
 /**
  * Services for verifications (without a profile).
@@ -19,6 +20,58 @@ import java.net.http.HttpResponse;
  * @version 1.0
  */
 public class VerificationService {
+
+    /**
+     * Gets all verifications for the client.
+     *
+     * @return VerificationPage  A page of verifications.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static VerificationPage getAll() throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.get("verifications");
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, VerificationPage.class);
+    }
+
+    /**
+     * Gets a page of verifications.
+     *
+     * @param pageNum  The page number (the first page is page 1).
+     * @param pageSize  The page size.
+     * @return VerificationPage  A page of verifications.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static VerificationPage getPage(int pageNum, int pageSize)
+            throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.get("verifications?page[number]=" + pageNum + "&page[size]=" + pageSize);
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, VerificationPage.class);
+    }
+
+    /**
+     * Gets a verification.
+     *
+     * @param id  ID of the verification.
+     * @return Verification  A verification object.
+     * @throws URISyntaxException  If there was a problem creating the URI.
+     * @throws IOException  If there was an IO error sending the request.
+     * @throws InterruptedException  If there was an interrupted exception sending the request.
+     * @throws ApiException  If the API returned errors.
+     */
+    public static Verification get(UUID id) throws URISyntaxException, IOException, InterruptedException, ApiException {
+        HttpResponse<String> response = CustomateClient.get("verifications/" + id);
+        String responseBody = response.body();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(responseBody, Verification.class);
+    }
 
     /**
      * Verifies a person without a profile - checks the name, gender, date of birth, address, passport, driving licence, identity card, tax ID number.

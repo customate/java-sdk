@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Models a profile verification (response).
@@ -31,6 +32,8 @@ public class VerificationResponse extends BaseModel {
     private String verificationId;
     @JsonProperty("verification_failure_reasons")
     private List<VerificationFailureReason> verificationFailureReasons;
+    @JsonProperty("id")
+    private UUID id;
 
     /**
      * Default constructor.

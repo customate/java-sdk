@@ -453,6 +453,18 @@ public class TestSDKApplication {
             VerificationNoProfileResponse verificationPepSanctionsResponsePass = verifyPepSanctionsNoProfilePass();
             LOGGER.info("Verify person (PEP & Sanctions) - should pass\n" + verificationPepSanctionsResponsePass.asJson() + "\n");
 
+            // Get the last verification
+            Verification verification = getVerification(verificationPepSanctionsResponsePass.getId());
+            LOGGER.info("Get verification, ID: " + verification.getId() + "\n" + verification.asJson() + "\n");
+
+            // Get all verifications
+            VerificationPage verifications = getVerifications();
+            LOGGER.info("All verifications\n" + verifications.asJson() + "\n");
+
+            // Get a page of verifications
+            VerificationPage verificationPage = getVerificationPage(1, 1);
+            LOGGER.info("Page 1 with 1 verification per page\n" + verificationPage.asJson() + "\n");
+
         } catch (RuntimeException e) {
             LOGGER.error("Exception: " + e.getMessage());
         }
@@ -1499,13 +1511,9 @@ public class TestSDKApplication {
             Passport passport = new PassportBuilder().setNumber("AA1234567890GBR1234567A1234567<<<<<<<<<<<<<<01")
                     .setExpiryDate("2031-09-23").setOriginCountry("GB").build();
 
-            VerificationPepSanctionsRequest verificationPepSanctionsRequestOrig = new VerificationPepSanctionsRequestBuilder()
-                    .setFirstName("Vladimir").setMiddleName("Vladimirovich").setLastName("Putin")
-                    .setBirthDate("1952-10-07").setAddress(address).setPassport(passport).build();
-
             VerificationPepSanctionsRequest verificationPepSanctionsRequest = new VerificationPepSanctionsRequestBuilder()
                     .setFirstName("Vladimir").setMiddleName("Vladimirovich").setLastName("Putin")
-                    .setBirthDate("1952-10-07").build();
+                    .setBirthDate("1952-10-07").setAddress(address).setPassport(passport).build();
 
             return VerificationService.verifyPepSanctionsNoProfile(verificationPepSanctionsRequest);
         } catch (Exception e) {
@@ -1528,9 +1536,42 @@ public class TestSDKApplication {
 
             VerificationPepSanctionsRequest verificationPepSanctionsRequest = new VerificationPepSanctionsRequestBuilder()
                     .setFirstName("Akshata").setMiddleName("Narayan").setLastName("Murty")
-                    .setBirthDate("1980-04-25").build();
+                    .setBirthDate("1980-04-25").setAddress(address).setPassport(passport).build();
 
             return VerificationService.verifyPepSanctionsNoProfile(verificationPepSanctionsRequest);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get all verifications
+    private static VerificationPage getVerifications() {
+        try {
+            return VerificationService.getAll();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a page of verifications
+    private static VerificationPage getVerificationPage(int pageNum, int pageSize) {
+        try {
+            return VerificationService.getPage(pageNum, pageSize);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    // Get a verification
+    private static Verification getVerification(UUID id) {
+        try {
+            return VerificationService.get(id);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return null;
